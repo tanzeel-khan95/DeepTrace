@@ -14,9 +14,9 @@ ENV: Literal["dev", "staging", "prod"] = os.getenv("ENV", "dev")   # type: ignor
 USE_MOCK: bool = os.getenv("USE_MOCK", "true").lower() == "true"
 LANGCHAIN_TRACING: bool = os.getenv("LANGCHAIN_TRACING_V2", "false").lower() == "true"
 
-# ── Loop / token controls ────────────────────────────────────────────────────
-MAX_LOOPS:  dict = {"dev": 2,   "staging": 3, "prod": 5}
-MAX_TOKENS: dict = {"dev": 500, "staging": 1500, "prod": 3000}
+# ── Loop / token controls (Phase 2 cost constraint: target <$0.01/run in dev) ─
+MAX_LOOPS:  dict = {"dev": 1,   "staging": 3, "prod": 5}
+MAX_TOKENS: dict = {"dev": 5000, "staging": 1500, "prod": 3000}
 QUALITY_THRESHOLD: float = 0.80   # Stop loop when research_quality >= this
 
 # ── Model assignments per environment ────────────────────────────────────────
@@ -47,6 +47,30 @@ MODEL_CONFIG: dict = {
 
 # ── Active model shortcuts ────────────────────────────────────────────────────
 MODELS = MODEL_CONFIG[ENV]
+
+# ── Haiku model string (Phase 2 convenience constant) ─────────────────────────
+HAIKU_MODEL = "claude-haiku-4-5-20251001"
+
+# ── Anthropic API key ─────────────────────────────────────────────────────────
+ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+
+# ── LLM cache directory (Phase 2 record-replay) ───────────────────────────────
+LLM_CACHE_DIR: str = os.getenv("LLM_CACHE_DIR", ".llm_cache")
+LLM_CACHE_ENABLED: bool = os.getenv("LLM_CACHE_ENABLED", "true").lower() == "true"
+
+# ── Phase 2 startup validation ────────────────────────────────────────────────
+def validate_phase2_config() -> list:
+    """
+    Check all required Phase 2 env vars are set.
+    Returns list of missing variable names (empty = all good).
+    """
+    errors = []
+    if not USE_MOCK:
+        if not ANTHROPIC_API_KEY:
+            errors.append("ANTHROPIC_API_KEY — required when USE_MOCK=false")
+        if not TAVILY_API_KEY:
+            errors.append("TAVILY_API_KEY — required for real search")
+    return errors
 
 # ── Neo4j ─────────────────────────────────────────────────────────────────────
 NEO4J_URI:      str = os.getenv("NEO4J_URI",      "bolt://localhost:7687")

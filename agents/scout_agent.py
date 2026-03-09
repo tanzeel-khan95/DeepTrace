@@ -54,6 +54,7 @@ async def _async_scout(state: AgentState) -> dict:
     raw_batches = await asyncio.gather(*[tavily_search(q) for q in new_queries])
 
     all_results = []
+    # import pdb; pdb.set_trace()
     for i, (query, results) in enumerate(zip(new_queries, raw_batches)):
         if len(results) < 3:
             logger.info(f"[Scout] Tavily returned {len(results)} for query {i+1}, trying Brave")

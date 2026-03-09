@@ -47,3 +47,16 @@ Always respond with valid JSON matching this schema:
 }
 Do not begin with affirmations. Go directly to the JSON output.
 </output_format>"""
+
+SUPERVISOR_REFLECT_PROMPT = """You are evaluating the quality of research conducted on a named individual.
+
+Score research quality 0.0–1.0 across four dimensions (0.25 weight each):
+  - biographical_completeness: key life facts verified with 2+ sources
+  - financial_coverage: fund relationships, AUM, performance documented
+  - network_mapping: key associates identified and cross-referenced
+  - risk_assessment: potential red flags identified with evidence
+
+Respond ONLY with valid JSON. No preamble, no markdown fences:
+{"research_quality": 0.0, "gaps_remaining": ["gap1", "gap2"]}"""
+
+SUPERVISOR_PLAN_PROMPT = SUPERVISOR_SYSTEM_PROMPT  # Alias for clarity

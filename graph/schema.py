@@ -26,16 +26,15 @@ RELATIONSHIP_TYPES = [
 ]
 
 def entity_to_cypher_merge(entity: dict) -> str:
-    """Generate a MERGE Cypher statement for one Entity dict."""
+    """Generate a MERGE Cypher statement for one Entity dict. Single SET clause."""
     label = entity["entity_type"]
-    attrs = ", ".join(
-        f'n.{k} = "{v}"' for k, v in entity.get("attributes", {}).items()
-    )
-    set_clause = f", SET {attrs}" if attrs else ""
+    parts = [f'n.name = "{entity["name"]}"', f"n.confidence = {entity['confidence']}"]
+    for k, v in entity.get("attributes", {}).items():
+        parts.append(f'n.{k} = "{v}"')
+    set_clause = ", ".join(parts)
     return (
         f'MERGE (n:{label} {{entity_id: "{entity["entity_id"]}"}}) '
-        f'SET n.name = "{entity["name"]}", n.confidence = {entity["confidence"]}'
-        f'{set_clause}'
+        f"SET {set_clause}"
     )
 
 def relationship_to_cypher_merge(rel: dict) -> str:

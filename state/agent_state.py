@@ -163,7 +163,7 @@ class AgentState(TypedDict):
     run_id:          str
 
 
-def make_initial_state(target_name: str, target_context: str = "") -> AgentState:
+def make_initial_state(target_name: str, target_context: str = "", run_id: Optional[str] = None) -> AgentState:
     """Create a fresh AgentState for a new research run."""
     return AgentState(
         target_name=target_name,
@@ -181,5 +181,5 @@ def make_initial_state(target_name: str, target_context: str = "") -> AgentState
         research_quality=0.0,
         loop_count=0,
         final_report=None,
-        run_id=str(uuid.uuid4()),
+        run_id=run_id or str(uuid.uuid4()),
     )

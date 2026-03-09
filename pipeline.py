@@ -12,6 +12,7 @@ Graph flow:
 Architecture position: imported by main.py and Streamlit pages.
 """
 import logging
+from typing import Optional
 from langgraph.graph import StateGraph, START, END
 
 from state.agent_state import AgentState, make_initial_state
@@ -86,12 +87,13 @@ def run_pipeline(target_name: str, target_context: str = "") -> AgentState:
     return final_state
 
 
-def stream_pipeline(target_name: str, target_context: str = ""):
+def stream_pipeline(target_name: str, target_context: str = "", run_id: Optional[str] = None):
     """
     Execute a research run with streaming updates.
     Yields (node_name, state_delta) tuples for Streamlit live display.
+    If run_id is provided (e.g. from Streamlit), it is used for Neo4j isolation.
     """
-    initial_state = make_initial_state(target_name, target_context)
+    initial_state = make_initial_state(target_name, target_context, run_id=run_id)
     graph = build_graph()
 
     for chunk in graph.stream(initial_state, stream_mode="updates"):

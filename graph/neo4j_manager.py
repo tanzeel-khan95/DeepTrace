@@ -75,7 +75,7 @@ def write_entities(entities: List[dict], run_id: str) -> int:
     with driver.session(database=NEO4J_DATABASE) as session:
         for entity in entities:
             cypher = entity_to_cypher_merge(entity)
-            # Add run_id for isolation between test runs
+            # Add run_id to SET clause for isolation between test runs
             cypher += f', n.run_id = "{run_id}"'
             try:
                 session.run(cypher)

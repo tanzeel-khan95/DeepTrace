@@ -17,29 +17,47 @@ async def tavily_search(query: str) -> list:
         logger.debug(f"[Tavily] MOCK search: {query[:50]}")
         return _mock_results_for_query(query)
 
-    # Phase 2+: real Tavily call
+    import asyncio
+    return await asyncio.to_thread(_sync_tavily_search, query)
+
+
+def _sync_tavily_search(query: str) -> list:
+    """Sync Tavily search — called via asyncio.to_thread. Phase 2."""
     try:
-        from tavily import AsyncTavilyClient   # import inside branch only
-        client = AsyncTavilyClient(api_key=TAVILY_API_KEY)
-        response = await client.search(
+        from tavily import TavilyClient
+        if not TAVILY_API_KEY:
+            logger.error("[Tavily] TAVILY_API_KEY not set — returning empty results")
+            return []
+
+        client = TavilyClient(api_key=TAVILY_API_KEY)
+        response = client.search(
             query=query,
-            search_depth="advanced",
+            search_depth="basic",
             max_results=5,
             include_raw_content=False,
         )
+
         results = []
         for r in response.get("results", []):
-            results.append({
-                "url":           r.get("url", ""),
-                "title":         r.get("title", ""),
-                "content":       r.get("content", ""),
-                "relevance":     float(r.get("score", 0.5)),
-                "source_domain": _extract_domain(r.get("url", "")),
-            })
-        return [r for r in results if r["relevance"] >= MIN_RELEVANCE]
+            domain = _extract_domain(r.get("url", ""))
+            relevance = float(r.get("score", 0.5))
+            if relevance >= MIN_RELEVANCE:
+                results.append({
+                    "url": r.get("url", ""),
+                    "title": r.get("title", ""),
+                    "content": r.get("content", ""),
+                    "relevance": relevance,
+                    "source_domain": domain,
+                })
+
+        logger.info(f"[Tavily] Real search: '{query[:40]}' → {len(results)} results")
+        return results
+
     except Exception as e:
-        logger.error(f"[Tavily] Error for query '{query}': {e}")
-        return []
+        logger.error(f"[Tavily] API error for '{query}': {e}")
+        logger.warning("[Tavily] Falling back to mock results due to API error")
+        from mock_responses import MOCK_SCOUT_RESULTS
+        return MOCK_SCOUT_RESULTS["raw_results"][:2]
 
 
 def _mock_results_for_query(query: str) -> list:

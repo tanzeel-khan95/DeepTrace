@@ -37,6 +37,17 @@ def _check_budget() -> None:
 def get_total_spent() -> float:
     return _total_spent
 
+
+def spend_summary() -> str:
+    """Return human-readable spend summary for CLI and Streamlit display."""
+    limit = PHASE_BUDGET.get(ENV, 10.0)
+    pct = (_total_spent / limit * 100) if limit > 0 else 0
+    return (
+        f"Spend: ${_total_spent:.4f} / ${limit:.2f} limit "
+        f"({pct:.1f}% of {ENV} budget)"
+    )
+
+
 def reset() -> None:
     global _total_spent
     _total_spent = 0.0

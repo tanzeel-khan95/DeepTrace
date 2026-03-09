@@ -25,21 +25,99 @@ if neo4j_ok:
 else:
     st.sidebar.error("❌ Neo4j Offline — run: docker compose up -d neo4j")
 
-# Fetch graph data
+# Fetch graph data for the current run (run_id set by Research page)
 run_id = st.session_state.get("run_id", None)
+last_target = st.session_state.get("last_target", "")
+if last_target:
+    st.caption(f"Target: **{last_target}**")
 if run_id and neo4j_ok:
     graph_data = fetch_graph_for_run(run_id)
     nodes, edges = graph_data["nodes"], graph_data["edges"]
     st.caption(f"Showing {len(nodes)} nodes, {len(edges)} relationships")
+    if len(nodes) == 0 and len(edges) == 0:
+        st.info("No entities from this run yet. Run Research first or check Deep Dive extraction.")
 else:
-    # Use mock data for Phase 1 demo
+    # Use mock data when no run has been executed
     from mock_responses import MOCK_DEEP_DIVE_RESULTS
     nodes = MOCK_DEEP_DIVE_RESULTS["entities"]
     edges = MOCK_DEEP_DIVE_RESULTS["relationships"]
-    st.info("Showing mock graph data. Run a research target first for live graph.")
+    st.info("Showing mock graph data. Run a research target on the Research page for live graph.")
 
-html = generate_pyvis_html(nodes, edges)
-components.html(html, height=520, scrolling=False)
+
+def _node_type(node: dict) -> str:
+    """Best-effort entity type for filtering."""
+    if node.get("entity_type"):
+        return str(node["entity_type"])
+    labels = node.get("labels") or []
+    if labels:
+        return str(labels[0])
+    return "Unknown"
+
+
+if nodes:
+    # Sidebar controls to declutter dense graphs
+    st.sidebar.markdown("### Graph Controls")
+
+    all_types = sorted({_node_type(n) for n in nodes})
+    selected_types = st.sidebar.multiselect(
+        "Visible node types",
+        options=all_types,
+        default=all_types,
+    )
+
+    min_conf = st.sidebar.slider(
+        "Minimum confidence",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.30,
+        step=0.05,
+        help="Hide weaker nodes and relationships below this confidence.",
+    )
+
+    show_edge_labels = st.sidebar.checkbox(
+        "Show relationship labels on edges",
+        value=False,
+        help="Edge labels can make dense graphs harder to read. Toggle them on when needed.",
+    )
+
+    # Apply filters
+    filtered_nodes = [
+        n
+        for n in nodes
+        if _node_type(n) in selected_types and n.get("confidence", 0.0) >= min_conf
+    ]
+    visible_ids = {n.get("entity_id") for n in filtered_nodes}
+
+    filtered_edges = [
+        e
+        for e in edges
+        if e.get("from_id") in visible_ids
+        and e.get("to_id") in visible_ids
+        and e.get("confidence", 0.0) >= min_conf
+    ]
+
+    # Try to focus on the current target node, if present
+    focus_node_id = None
+    if last_target:
+        for n in filtered_nodes:
+            if n.get("name") == last_target:
+                focus_node_id = n.get("entity_id")
+                break
+
+    st.caption(
+        f"Visible after filters: {len(filtered_nodes)} nodes, {len(filtered_edges)} relationships"
+    )
+
+    html = generate_pyvis_html(
+        filtered_nodes,
+        filtered_edges,
+        show_edge_labels=show_edge_labels,
+        focus_node_id=focus_node_id,
+    )
+else:
+    html = generate_pyvis_html(nodes, edges)
+
+components.html(html, height=640, scrolling=False)
 
 # Legend
 st.markdown("#### Node Legend")
