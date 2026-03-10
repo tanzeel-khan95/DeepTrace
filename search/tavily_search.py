@@ -7,7 +7,8 @@ Phase 2+ (USE_MOCK=false): calls real Tavily API.
 Architecture position: called by scout_agent.py.
 """
 import logging
-from config import USE_MOCK, TAVILY_API_KEY, MIN_RELEVANCE
+from config import USE_MOCK, TAVILY_API_KEY, MIN_RELEVANCE, MAX_SEARCH_RESULTS_PER_QUERY
+from utils.retry import get_search_bucket, with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +31,24 @@ def _sync_tavily_search(query: str) -> list:
             return []
 
         client = TavilyClient(api_key=TAVILY_API_KEY)
-        response = client.search(
-            query=query,
-            search_depth="basic",
-            max_results=5,
-            include_raw_content=False,
+
+        @with_retry(max_retries=2, base_delay=2.0)
+        def _do_tavily_search(t_client, t_query, depth, max_results):
+            return t_client.search(
+                query=t_query,
+                search_depth=depth,
+                max_results=max_results,
+                include_raw_content=False,
+            )
+
+        # Rate limit Tavily calls
+        get_search_bucket().acquire()
+
+        response = _do_tavily_search(
+            client,
+            query,
+            "basic",
+            MAX_SEARCH_RESULTS_PER_QUERY,
         )
 
         results = []

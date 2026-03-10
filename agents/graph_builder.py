@@ -10,11 +10,11 @@ Neo4j is the one real external service in Phase 1.
 Architecture position: fifth and final node in LangGraph pipeline.
 """
 import logging
-from langsmith import traceable
 from config import USE_MOCK
 from state.agent_state import AgentState
 from graph.neo4j_manager import setup_schema, write_entities, write_relationships
 from graph.visualizer import generate_pyvis_html
+from utils.tracing import traceable
 
 logger = logging.getLogger(__name__)
 

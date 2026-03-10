@@ -10,7 +10,6 @@ Phase 2+ (USE_MOCK=false): uses Haiku for extraction from snippets only.
 Architecture position: third node in LangGraph pipeline, called after Scout.
 """
 import logging
-from langsmith import traceable
 from pydantic import ValidationError
 from config import USE_MOCK, MODELS, MAX_TOKENS, ENV
 from state.agent_state import AgentState, Fact, Entity, Relationship
@@ -19,6 +18,7 @@ from utils.anthropic_client import call_llm_structured
 from prompts.deep_dive_prompt import DEEP_DIVE_SYSTEM_PROMPT
 from evaluation.confidence_scorer import score_facts_batch
 from mock_responses import MOCK_DEEP_DIVE_RESULTS
+from utils.tracing import traceable
 
 logger = logging.getLogger(__name__)
 

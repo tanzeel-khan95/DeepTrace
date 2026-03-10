@@ -15,6 +15,7 @@ import os
 import sys
 import click
 from dotenv import load_dotenv
+from utils.tracing import configure_langsmith
 
 load_dotenv()
 
@@ -41,6 +42,9 @@ def main(target, context, env, run_eval, test_connections, stream):
 
     if env:
         os.environ["ENV"] = env
+
+    # Configure LangSmith tracing (no-op if disabled or misconfigured)
+    configure_langsmith()
 
     from config import ENV, USE_MOCK
     console.print(Panel(

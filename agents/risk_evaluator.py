@@ -12,7 +12,6 @@ Architecture position: fourth node in LangGraph pipeline, runs after loop conver
 """
 import json
 import logging
-from langsmith import traceable
 from pydantic import ValidationError
 from config import USE_MOCK, MODELS, MAX_TOKENS, ENV
 from state.agent_state import AgentState, RiskFlag
@@ -20,6 +19,7 @@ from state.llm_schemas import RiskEvaluatorResponse
 from utils.anthropic_client import call_llm_structured
 from prompts.risk_prompt import RISK_EVALUATOR_SYSTEM_PROMPT
 from mock_responses import MOCK_RISK_FLAGS
+from utils.tracing import traceable
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ def run_risk_evaluator(state: AgentState) -> dict:
         f for f in state["extracted_facts"]
         if state["confidence_map"].get(f.fact_id, f.confidence) >= MIN_EVIDENCE_CONFIDENCE
     ][:20]
-    import pdb; pdb.set_trace()
+
     if not usable_facts:
         logger.warning("[RiskEvaluator] No usable facts — skipping risk evaluation")
         return {"risk_flags": []}
@@ -100,7 +100,7 @@ Rules:
             max_tokens=MAX_TOKENS[ENV],
             response_model=RiskEvaluatorResponse,
         )
-        import pdb; pdb.set_trace()
+
         flags = list(parsed.risk_flags) if parsed.risk_flags else []
         # Filter to only flags with >= 2 evidence (schema should enforce; double-check)
         flags = [f for f in flags if len(f.evidence_fact_ids) >= 2]

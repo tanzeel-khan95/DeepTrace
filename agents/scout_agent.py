@@ -2,8 +2,7 @@
 agents/scout_agent.py — Scout Agent: parallel search execution.
 
 Dispatches all queries from research_plan simultaneously via asyncio.gather().
-Primary: Tavily. Fallback: Brave if Tavily returns < 3 results.
-Deduplicates results by URL before returning.
+Primary: Tavily search. Deduplicates results by URL before returning.
 
 Phase 1 (USE_MOCK=true): returns MOCK_SCOUT_RESULTS fixture directly.
 Phase 2+ (USE_MOCK=false): executes real parallel searches.
@@ -12,10 +11,10 @@ Architecture position: second node in LangGraph pipeline, called by Supervisor.
 """
 import asyncio
 import logging
-from langsmith import traceable
 from config import USE_MOCK, MIN_RELEVANCE
 from state.agent_state import AgentState
 from mock_responses import MOCK_SCOUT_RESULTS
+from utils.tracing import traceable
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +40,6 @@ def run_scout(state: AgentState) -> dict:
 async def _async_scout(state: AgentState) -> dict:
     """Real async implementation for Phase 2+."""
     from search.tavily_search import tavily_search
-    from search.brave_search  import brave_search
 
     new_queries = [q for q in state["research_plan"]
                    if q not in state["queries_issued"]]
@@ -54,12 +52,15 @@ async def _async_scout(state: AgentState) -> dict:
     raw_batches = await asyncio.gather(*[tavily_search(q) for q in new_queries])
 
     all_results = []
-    # import pdb; pdb.set_trace()
+
+    MIN_RESULTS_THRESHOLD = 2
+
     for i, (query, results) in enumerate(zip(new_queries, raw_batches)):
-        if len(results) < 3:
-            logger.info(f"[Scout] Tavily returned {len(results)} for query {i+1}, trying Brave")
-            brave_results = await brave_search(query)
-            results = results + brave_results
+        if len(results) < MIN_RESULTS_THRESHOLD:
+            logger.warning(
+                f"[Scout] Low search coverage for query {i+1}: "
+                f"{len(results)} results from Tavily for '{query[:60]}'"
+            )
 
         for r in results:
             if r.get("relevance", 0) >= MIN_RELEVANCE:

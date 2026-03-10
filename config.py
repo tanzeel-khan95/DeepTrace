@@ -12,7 +12,11 @@ from typing import Literal
 # ── Core toggles ──────────────────────────────────────────────────────────────
 ENV: Literal["dev", "staging", "prod"] = os.getenv("ENV", "dev")   # type: ignore
 USE_MOCK: bool = os.getenv("USE_MOCK", "true").lower() == "true"
+
+# ── LangSmith / LangChain tracing ─────────────────────────────────────────────
 LANGCHAIN_TRACING: bool = os.getenv("LANGCHAIN_TRACING_V2", "false").lower() == "true"
+LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", f"DeepTrace")
+LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
 
 # ── Loop / token controls (Phase 2 cost constraint: target <$0.01/run in dev) ─
 MAX_LOOPS:  dict = {"dev": 1,   "staging": 3, "prod": 5}
@@ -83,8 +87,60 @@ TAVILY_API_KEY:       str = os.getenv("TAVILY_API_KEY", "")
 BRAVE_SEARCH_API_KEY: str = os.getenv("BRAVE_SEARCH_API_KEY", "")
 MIN_RELEVANCE:        float = 0.50   # Filter search results below this score
 
-# ── LangSmith ─────────────────────────────────────────────────────────────────
-LANGSMITH_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", f"deeptrace-{ENV}")
+# ── LangSmith (alias for LangChain project) ───────────────────────────────────
+LANGSMITH_PROJECT: str = LANGCHAIN_PROJECT
 
 # ── Budget guard ──────────────────────────────────────────────────────────────
 PHASE_BUDGET: dict = {"dev": 10.0, "staging": 25.0, "prod": 999.0}
+
+# ── Checkpointing ─────────────────────────────────────────────────────────────
+CHECKPOINT_DB_PATH: str = os.getenv("CHECKPOINT_DB_PATH", ".checkpoints/deeptrace.db")
+
+# ── Audit logging ─────────────────────────────────────────────────────────────
+AUDIT_LOG_DIR: str = os.getenv("AUDIT_LOG_DIR", ".audit_logs")
+
+# ── Graph artifact persistence ────────────────────────────────────────────────
+GRAPH_ARTIFACT_DIR: str = os.getenv("GRAPH_ARTIFACT_DIR", ".graph_artifacts")
+
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+LLM_MAX_RETRIES: int = int(os.getenv("LLM_MAX_RETRIES", "3"))
+LLM_RETRY_BASE_DELAY: float = float(os.getenv("LLM_RETRY_BASE_DELAY", "1.0"))
+LLM_REQUESTS_PER_MIN: int = int(os.getenv("LLM_REQUESTS_PER_MIN", "50"))  # Haiku tier 1
+
+# ── Search feature toggles ───────────────────────────────────────────────────
+HAIKU_WEB_SEARCH_ENABLED: bool = os.getenv("HAIKU_WEB_SEARCH_ENABLED", "true").lower() == "true"
+MAX_SEARCH_RESULTS_PER_QUERY: int = int(os.getenv("MAX_SEARCH_RESULTS_PER_QUERY", "5"))
+
+# ── Extraction coverage ───────────────────────────────────────────────────────
+EXTRACTION_CATEGORIES = ["biographical", "professional", "financial", "behavioral"]
+
+# ── Entity canonicalization ───────────────────────────────────────────────────
+ENTITY_SIMILARITY_THRESHOLD: float = float(os.getenv("ENTITY_SIMILARITY_THRESHOLD", "0.85"))
+
+
+def validate_config() -> list:
+    """
+    Validate configuration for Phase 2 and Phase 3.
+
+    Returns list of error messages (empty = all good).
+    """
+    errors = []
+    if not USE_MOCK:
+        if not ANTHROPIC_API_KEY:
+            errors.append("ANTHROPIC_API_KEY — required when USE_MOCK=false")
+        if not TAVILY_API_KEY:
+            errors.append("TAVILY_API_KEY — required for real search")
+
+    if LANGCHAIN_TRACING and not LANGCHAIN_API_KEY:
+        errors.append("LANGCHAIN_API_KEY — required when LANGCHAIN_TRACING_V2=true")
+
+    return errors
+
+
+def validate_phase2_config() -> list:
+    """
+    Backwards-compatible wrapper for existing Phase 2 validation.
+
+    Uses the unified validate_config() implementation.
+    """
+    return validate_config()

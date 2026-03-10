@@ -15,7 +15,6 @@ Called by pipeline.py via StateGraph node registration.
 """
 import json
 import logging
-from langsmith import traceable
 from config import USE_MOCK, MAX_LOOPS, QUALITY_THRESHOLD, ENV, MODELS, MAX_TOKENS
 from pydantic import ValidationError
 from state.agent_state import AgentState
@@ -27,6 +26,7 @@ from mock_responses import (
     MOCK_SUPERVISOR_LOOP_2,
     MOCK_SUPERVISOR_FINAL,
 )
+from utils.tracing import traceable
 
 logger = logging.getLogger(__name__)
 

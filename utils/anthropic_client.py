@@ -13,11 +13,12 @@ enforce JSON schema via Anthropic output_config — no raw text parsing.
 Architecture position: imported by all agents in Phase 2+.
 Never import anthropic directly in agent files.
 """
-import json
 import logging
 from typing import List,Optional, Type, TypeVar
 
 from pydantic import BaseModel
+
+from utils.retry import get_llm_bucket, with_retry
 
 logger = logging.getLogger(__name__)
 _client = None
@@ -81,6 +82,15 @@ def call_llm(
 
     client = get_client()
 
+    @with_retry()
+    def _do_create(inner_client, inner_model, inner_max_tokens, inner_system_block, inner_messages):
+        return inner_client.messages.create(
+            model=inner_model,
+            max_tokens=inner_max_tokens,
+            system=inner_system_block,
+            messages=inner_messages,
+        )
+
     # Build system block with prompt caching
     if use_cache:
         system_block = [
@@ -93,11 +103,15 @@ def call_llm(
     else:
         system_block = system_prompt
 
-    response = client.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        system=system_block,
-        messages=[{"role": "user", "content": user_message}],
+    # Rate limit Anthropic calls
+    get_llm_bucket().acquire()
+
+    response = _do_create(
+        client,
+        model,
+        max_tokens,
+        system_block,
+        [{"role": "user", "content": user_message}],
     )
 
     text = response.content[0].text
