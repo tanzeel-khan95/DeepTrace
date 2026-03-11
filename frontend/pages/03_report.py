@@ -26,9 +26,32 @@ else:
 
 st.divider()
 
-# ── Risk flags ────────────────────────────────────────────────────────────────
+# ── Risk flags (with source links per flag) ────────────────────────────────────
 st.subheader("🚨 Risk Flags")
 risk_flags = state.get("risk_flags", [])
+citations = state.get("citations", [])
+
+# Build fact_id -> list of citations for resolving risk evidence to sources
+citations_by_fact_id = defaultdict(list)
+for c in citations:
+    fid = c.get("fact_id", "") if isinstance(c, dict) else getattr(c, "fact_id", "")
+    if fid:
+        citations_by_fact_id[fid].append(c)
+
+def _refs_for_flag(flag, citations_by_fact_id):
+    """Resolve evidence_fact_ids to unique (url, title) refs for this flag."""
+    evidence_ids = flag.get("evidence_fact_ids", []) if isinstance(flag, dict) else getattr(flag, "evidence_fact_ids", [])
+    seen_urls = set()
+    refs = []
+    for fid in evidence_ids or []:
+        for c in citations_by_fact_id.get(fid, []):
+            url = c.get("url", "") if isinstance(c, dict) else getattr(c, "url", "")
+            if url and url not in seen_urls:
+                seen_urls.add(url)
+                title = c.get("title", url) if isinstance(c, dict) else getattr(c, "title", url)
+                refs.append((url, title or url))
+    return refs
+
 if not risk_flags:
     st.success("No risk flags identified.")
 else:
@@ -49,6 +72,13 @@ else:
         icon = SEVERITY_COLORS.get(sev, "⚪")
         with st.expander(f"{icon} [{sev}] {title}  —  {int(conf*100)}% confidence"):
             st.write(desc)
+            refs = _refs_for_flag(flag, citations_by_fact_id)
+            if refs:
+                st.caption("**Sources:**")
+                for url, link_title in refs:
+                    st.markdown(f"• [{link_title[:80]}{'…' if len(link_title) > 80 else ''}]({url})")
+            else:
+                st.caption("_No source links for this flag._")
 
 st.divider()
 

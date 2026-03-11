@@ -74,6 +74,11 @@ Generate the next batch of research queries covering all 5 categories."""
         research_plan = list(parsed.research_plan) if parsed.research_plan else []
         gaps_remaining = list(parsed.gaps_remaining) if parsed.gaps_remaining else []
 
+        # Programmatic guardrail: remove any queries that were already issued
+        # in previous loops to reduce repetition, even if the model repeats them.
+        already_issued = set(state.get("queries_issued", []))
+        research_plan = [q for q in research_plan if q not in already_issued]
+
     except (ValidationError, Exception) as e:
         logger.warning(f"[Supervisor::plan] Structured parse failed, using fallback: {e}")
         research_plan = [f"{state['target_name']} background career"]

@@ -58,7 +58,7 @@ def run_risk_evaluator(state: AgentState) -> dict:
     usable_facts = [
         f for f in state["extracted_facts"]
         if state["confidence_map"].get(f.fact_id, f.confidence) >= MIN_EVIDENCE_CONFIDENCE
-    ][:20]
+    ]
 
     if not usable_facts:
         logger.warning("[RiskEvaluator] No usable facts — skipping risk evaluation")

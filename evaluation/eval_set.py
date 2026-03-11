@@ -11,6 +11,7 @@ from evaluation.eval_personas import (
     EVAL_PERSONA_SATYA_NADELLA,
     EVAL_PERSONA_ELIZABETH_HOLMES,
     EVAL_PERSONA_SAM_BANKMAN_FRIED,
+    EVAL_PERSONA_TIMOTHY_OVERTURF,
 )
 
 # Re-export for direct import
@@ -19,6 +20,7 @@ __all__ = [
     "EVAL_PERSONA_SATYA_NADELLA",
     "EVAL_PERSONA_ELIZABETH_HOLMES",
     "EVAL_PERSONA_SAM_BANKMAN_FRIED",
+    "EVAL_PERSONA_TIMOTHY_OVERTURF",
 ]
 
 # Scoring targets (from SRS Section 8.4)

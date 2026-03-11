@@ -19,9 +19,9 @@ LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", f"DeepTrace")
 LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
 
 # ── Loop / token controls (Phase 2 cost constraint: target <$0.01/run in dev) ─
-MAX_LOOPS:  dict = {"dev": 1,   "staging": 3, "prod": 5}
+MAX_LOOPS:  dict = {"dev": 3,   "staging": 3, "prod": 5}
 MAX_TOKENS: dict = {"dev": 5000, "staging": 1500, "prod": 3000}
-QUALITY_THRESHOLD: float = 0.80   # Stop loop when research_quality >= this
+QUALITY_THRESHOLD: float = 0.70   # Stop loop when research_quality >= this
 
 # ── Model assignments per environment ────────────────────────────────────────
 # Phase 1: these are never called (USE_MOCK=true). Defined now for Phase 2.
@@ -85,7 +85,7 @@ NEO4J_DATABASE: str = os.getenv("NEO4J_DATABASE", "neo4j")
 # ── Search ────────────────────────────────────────────────────────────────────
 TAVILY_API_KEY:       str = os.getenv("TAVILY_API_KEY", "")
 BRAVE_SEARCH_API_KEY: str = os.getenv("BRAVE_SEARCH_API_KEY", "")
-MIN_RELEVANCE:        float = 0.50   # Filter search results below this score
+MIN_RELEVANCE:        float = 0.55   # Filter search results below this score (slightly stricter)
 
 # ── LangSmith (alias for LangChain project) ───────────────────────────────────
 LANGSMITH_PROJECT: str = LANGCHAIN_PROJECT

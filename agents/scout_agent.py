@@ -109,14 +109,29 @@ async def _async_scout(state: AgentState) -> dict:
         else:
             logger.warning(f"[Scout] Query batch failed: {batch}")
 
+    # Filter by relevance and sort so that, when duplicates exist, the
+    # highest-relevance copy is seen first.
     all_results = [r for r in all_results if r.get("relevance", 0) >= MIN_RELEVANCE]
     all_results.sort(key=lambda r: r.get("relevance", 0), reverse=True)
-    all_results = all_results[: MAX_SEARCH_RESULTS_PER_QUERY * len(new_queries)]
 
-    seen_urls = set(r["url"] for r in state["raw_results"])
-    deduped = [r for r in all_results if r["url"] not in seen_urls]
+    # Enforce a global per-run URL deduplication so the same URL does not
+    # appear multiple times across different queries in this batch.
+    # Start with URLs already present in state["raw_results"] so we only
+    # keep genuinely new URLs for this node invocation.
+    seen_urls = set(r.get("url") for r in state["raw_results"] if r.get("url"))
+    deduped_batch = []
+    for r in all_results:
+        url = r.get("url")
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        deduped_batch.append(r)
 
-    log_node_complete("scout_agent", {"total_results": len(deduped), "queries": len(new_queries)})
-    logger.info(f"[Scout] {len(deduped)} new results after dedup")
+    # Apply global cap after deduplication.
+    max_allowed = MAX_SEARCH_RESULTS_PER_QUERY * len(new_queries)
+    deduped_batch = deduped_batch[:max_allowed]
 
-    return {"raw_results": deduped, "queries_issued": new_queries}
+    log_node_complete("scout_agent", {"total_results": len(deduped_batch), "queries": len(new_queries)})
+    logger.info(f"[Scout] {len(deduped_batch)} new results after dedup")
+
+    return {"raw_results": deduped_batch, "queries_issued": new_queries}

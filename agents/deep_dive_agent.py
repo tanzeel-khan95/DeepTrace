@@ -16,7 +16,8 @@ from state.agent_state import AgentState, Citation, Fact, Entity, Relationship
 from state.llm_schemas import DeepDiveResponse
 from utils.anthropic_client import call_llm_structured
 from prompts.deep_dive_prompt import DEEP_DIVE_SYSTEM_PROMPT
-from evaluation.confidence_scorer import score_facts_batch
+from evaluation.confidence_scorer import score_facts_batch, get_domain_trust
+from evaluation.fact_utils import merge_duplicate_facts
 from mock_responses import MOCK_DEEP_DIVE_RESULTS
 from utils.citation_builder import build_citations
 from utils.tracing import traceable
@@ -57,9 +58,22 @@ def run_deep_dive(state: AgentState) -> dict:
         }
 
     model = MODELS["deep_dive"]
+
+    # Prioritise highly trusted domains (e.g. sec.gov, IAPD, major financial press)
+    # when selecting sources for extraction by combining Tavily relevance with
+    # a domain trust boost.
+    def _effective_score(result: dict) -> float:
+        relevance = float(result.get("relevance", 0.0)) or 0.0
+        domain = result.get("source_domain", "") or ""
+        trust = get_domain_trust(domain)
+        # Centre around default (0.40) so unknown domains neither gain nor lose.
+        # High-trust domains like sec.gov receive a noticeable boost.
+        alpha = 0.5
+        return relevance + alpha * (trust - 0.40)
+
     results = sorted(
         state["raw_results"],
-        key=lambda r: r.get("relevance", 0),
+        key=_effective_score,
         reverse=True,
     )[:8]
 
@@ -104,6 +118,9 @@ def run_deep_dive(state: AgentState) -> dict:
     except (ValidationError, Exception) as e:
         logger.warning(f"[DeepDive] Structured parse failed, using empty extraction: {e}")
         facts, entities, rels = [], [], []
+
+    # Collapse near-duplicate facts before scoring and citation building.
+    facts = merge_duplicate_facts(facts)
 
     conf_map = score_facts_batch([f.model_dump() for f in facts])
 

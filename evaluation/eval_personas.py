@@ -138,16 +138,62 @@ EVAL_PERSONA_SAM_BANKMAN_FRIED = {
     "expected_flag_count": 4,
 }
 
+EVAL_PERSONA_TIMOTHY_OVERTURF = {
+    "name": "Timothy Silas Prugh Overturf",
+    "context": "CEO of Sisu Capital, LLC, an SEC-registered investment adviser",
+    "risk_level": "HIGH",
+    "due_diligence": {
+        "name": "Timothy Silas Prugh Overturf",
+        "role": "CEO of Sisu Capital, LLC",
+        "industry": "Investment advisory",
+        "firm": "Sisu Capital, LLC",
+        "firm_status": "SEC-registered investment adviser",
+        "key_relationship": "Authorized his father, Hansueli Overturf, to provide investment advice to firm clients",
+        "regulatory_concerns": [
+            "Hansueli Overturf provided advice despite two California suspensions: Nov 2011–Nov 2014 and Dec 2017–Dec 2019",
+            "At least one suspension period overlapped with active client advisory activity",
+        ],
+        "fee_activity": "Sisu Capital withdrew over $2 million in portfolio management fees, performance-based fees, and commissions from client accounts (2017–2021)",
+        "conflict_of_interest": "Undisclosed family relationship between CEO and advisory personnel; potential conflicts regarding fee allocation and investment recommendations",
+    },
+    "risk_flags_ground_truth": {
+        "risk_flags": [
+            "Suspended Investment Adviser Providing Client Advice (Hansueli Overturf advised Sisu clients despite California suspensions 2011–2014 and 2017–2019)",
+            "Undisclosed Family Conflict of Interest in Investment Management (CEO–father relationship; fee and recommendation oversight concerns)",
+        ],
+        "regulatory_action": [
+            "California suspension of Hansueli Overturf (Nov 2011–Nov 2014)",
+            "California suspension of Hansueli Overturf (Dec 2017–Dec 2019)",
+        ],
+        "litigation": "SEC and related enforcement attention regarding Sisu Capital, Timothy Overturf, and Hansueli Overturf",
+        "sanctions": False,
+        "pep": False,
+    },
+    "expected_facts": [
+        "Timothy Overturf is CEO of Sisu Capital, LLC",
+        "Sisu Capital, LLC is an SEC-registered investment adviser",
+        "Hansueli Overturf (father) provided investment advice to Sisu clients with Timothy Overturf's authorization",
+        "Hansueli Overturf was suspended by California (Nov 2011–Nov 2014 and Dec 2017–Dec 2019) from acting as an investment adviser",
+        "Sisu Capital withdrew over $2 million in fees from client accounts during 2017–2021",
+        "Undisclosed family relationship between CEO and advisory personnel created conflict of interest concerns",
+    ],
+    "expected_risk_levels": ["CRITICAL", "MEDIUM"],
+    "expected_risk_score": 75,
+    "expected_flag_count": 2,
+}
+
 ALL_EVAL_PERSONAS = [
     EVAL_PERSONA_SATYA_NADELLA,
     EVAL_PERSONA_ELIZABETH_HOLMES,
     EVAL_PERSONA_SAM_BANKMAN_FRIED,
+    EVAL_PERSONA_TIMOTHY_OVERTURF,
 ]
 
 __all__ = [
     "EVAL_PERSONA_SATYA_NADELLA",
     "EVAL_PERSONA_ELIZABETH_HOLMES",
     "EVAL_PERSONA_SAM_BANKMAN_FRIED",
+    "EVAL_PERSONA_TIMOTHY_OVERTURF",
     "ALL_EVAL_PERSONAS",
 ]
 

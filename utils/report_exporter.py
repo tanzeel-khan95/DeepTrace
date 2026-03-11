@@ -61,8 +61,24 @@ def _severity_color(severity: str) -> str:
     return colors.get(severity, "#7F8C8D")
 
 
+def _refs_for_flag_pdf(flag, citations_by_fact_id):
+    """Resolve evidence_fact_ids to unique (url, title) for PDF."""
+    evidence_ids = flag.get("evidence_fact_ids", []) if isinstance(flag, dict) else getattr(flag, "evidence_fact_ids", [])
+    seen_urls = set()
+    refs = []
+    for fid in evidence_ids or []:
+        for c in citations_by_fact_id.get(fid, []):
+            url = c.get("url", "") if isinstance(c, dict) else getattr(c, "url", "")
+            if url and url not in seen_urls:
+                seen_urls.add(url)
+                title = c.get("title", url) if isinstance(c, dict) else getattr(c, "title", url)
+                refs.append((url, (title or url)[:60]))
+    return refs
+
+
 def _build_pdf_html(target_name, final_report, risk_flags, citations, run_id) -> str:
     """Build styled HTML string for PDF rendering."""
+    from collections import defaultdict
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     try:
@@ -70,6 +86,12 @@ def _build_pdf_html(target_name, final_report, risk_flags, citations, run_id) ->
         report_html = markdown.markdown(final_report or "", extensions=["tables"])
     except ImportError:
         report_html = f"<pre>{final_report or ''}</pre>"
+
+    citations_by_fact_id = defaultdict(list)
+    for c in citations or []:
+        fid = c.get("fact_id", "") if isinstance(c, dict) else getattr(c, "fact_id", "")
+        if fid:
+            citations_by_fact_id[fid].append(c)
 
     flags_html = ""
     if risk_flags:
@@ -80,16 +102,24 @@ def _build_pdf_html(target_name, final_report, risk_flags, citations, run_id) ->
             desc = flag.get("description", "") if isinstance(flag, dict) else getattr(flag, "description", "")
             conf = flag.get("confidence", 0) if isinstance(flag, dict) else getattr(flag, "confidence", 0)
             color = _severity_color(sev)
+            refs = _refs_for_flag_pdf(flag, citations_by_fact_id)
+            sources_cell = ""
+            if refs:
+                links = " · ".join(f'<a href="{url}">{tit}</a>' for url, tit in refs[:5])
+                sources_cell = f"<td style='font-size:10px'>{links}</td>"
+            else:
+                sources_cell = "<td style='font-size:10px;color:#7A9AB5'>—</td>"
             rows += f"""<tr>
               <td><span style="background:{color};color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:bold">{sev}</span></td>
               <td style="font-weight:600">{title}</td>
               <td>{desc}</td>
               <td>{int(conf*100)}%</td>
+              {sources_cell}
             </tr>"""
         flags_html = f"""
         <h2>Risk Flags</h2>
         <table>
-          <thead><tr><th>Severity</th><th>Title</th><th>Description</th><th>Confidence</th></tr></thead>
+          <thead><tr><th>Severity</th><th>Title</th><th>Description</th><th>Confidence</th><th>Sources</th></tr></thead>
           <tbody>{rows}</tbody>
         </table>"""
 
