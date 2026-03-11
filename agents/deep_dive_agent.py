@@ -12,12 +12,13 @@ Architecture position: third node in LangGraph pipeline, called after Scout.
 import logging
 from pydantic import ValidationError
 from config import USE_MOCK, MODELS, MAX_TOKENS, ENV
-from state.agent_state import AgentState, Fact, Entity, Relationship
+from state.agent_state import AgentState, Citation, Fact, Entity, Relationship
 from state.llm_schemas import DeepDiveResponse
 from utils.anthropic_client import call_llm_structured
 from prompts.deep_dive_prompt import DEEP_DIVE_SYSTEM_PROMPT
 from evaluation.confidence_scorer import score_facts_batch
 from mock_responses import MOCK_DEEP_DIVE_RESULTS
+from utils.citation_builder import build_citations
 from utils.tracing import traceable
 
 logger = logging.getLogger(__name__)
@@ -37,13 +38,22 @@ def run_deep_dive(state: AgentState) -> dict:
         facts   = [Fact(**f)         for f in data["extracted_facts"]]
         entities= [Entity(**e)       for e in data["entities"]]
         rels    = [Relationship(**r) for r in data["relationships"]]
-        conf_map= score_facts_batch(data["extracted_facts"])
+        conf_map = score_facts_batch(data["extracted_facts"])
+        facts_as_dicts = [f.model_dump() for f in facts]
+        citation_dicts = build_citations(facts_as_dicts, state.get("raw_results", []))
+        citations = []
+        for c in citation_dicts:
+            try:
+                citations.append(Citation(**c))
+            except Exception as e:
+                logger.warning(f"[DeepDive] Invalid citation: {e}")
         logger.info(f"[DeepDive] MOCK: {len(facts)} facts, {len(entities)} entities validated")
         return {
             "extracted_facts": facts,
-            "entities":        entities,
-            "relationships":   rels,
-            "confidence_map":  conf_map,
+            "entities": entities,
+            "relationships": rels,
+            "confidence_map": conf_map,
+            "citations": citations,
         }
 
     model = MODELS["deep_dive"]
@@ -55,7 +65,7 @@ def run_deep_dive(state: AgentState) -> dict:
 
     if not results:
         logger.warning("[DeepDive] No raw_results to process")
-        return {"extracted_facts": [], "entities": [], "relationships": [], "confidence_map": {}}
+        return {"extracted_facts": [], "entities": [], "relationships": [], "confidence_map": {}, "citations": []}
 
     content_blocks = []
     for i, r in enumerate(results):
@@ -97,10 +107,20 @@ def run_deep_dive(state: AgentState) -> dict:
 
     conf_map = score_facts_batch([f.model_dump() for f in facts])
 
+    facts_as_dicts = [f.model_dump() for f in facts]
+    citation_dicts = build_citations(facts_as_dicts, state.get("raw_results", []))
+    citations = []
+    for c in citation_dicts:
+        try:
+            citations.append(Citation(**c))
+        except Exception as e:
+            logger.warning(f"[DeepDive] Invalid citation: {e}")
+
     logger.info(f"[DeepDive] Real: {len(facts)} facts, {len(entities)} entities, {len(rels)} rels")
     return {
         "extracted_facts": facts,
         "entities": entities,
         "relationships": rels,
         "confidence_map": conf_map,
+        "citations": citations,
     }

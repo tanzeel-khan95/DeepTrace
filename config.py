@@ -137,10 +137,3 @@ def validate_config() -> list:
     return errors
 
 
-def validate_phase2_config() -> list:
-    """
-    Backwards-compatible wrapper for existing Phase 2 validation.
-
-    Uses the unified validate_config() implementation.
-    """
-    return validate_config()

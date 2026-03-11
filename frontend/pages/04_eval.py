@@ -35,13 +35,33 @@ for metric, target in SCORING_TARGETS.items():
 
 # Show evaluation personas and their expected ground truth
 for persona in ALL_EVAL_PERSONAS:
-    with st.expander(f"**{persona['name']}** — {persona['context']}"):
+    risk_level = persona.get("risk_level")
+    title = f"**{persona['name']}** — {persona['context']}"
+    if risk_level:
+        title = f"{title} — `{risk_level.upper()} RISK`"
+
+    with st.expander(title):
         st.markdown(f"*Context:* {persona['context']}")
-        st.markdown("**Expected Facts:**")
-        for fact in persona["expected_facts"]:
-            st.markdown(f"- {fact}")
-        st.markdown("**Expected Risk Levels:**")
-        st.markdown(", ".join(f"`{level}`" for level in persona["expected_risk_levels"]))
+
+        if "due_diligence" in persona:
+            st.markdown("**Ground Truth – Due Diligence**")
+            st.json(persona["due_diligence"])
+
+        if "risk_flags_ground_truth" in persona:
+            st.markdown("**Risk Flags (Ground Truth)**")
+            st.json(persona["risk_flags_ground_truth"])
+
+        # Backwards-compatible display for older personas
+        expected_facts = persona.get("expected_facts")
+        if expected_facts:
+            st.markdown("**Expected Facts (Summary):**")
+            for fact in expected_facts:
+                st.markdown(f"- {fact}")
+
+        expected_levels = persona.get("expected_risk_levels")
+        if expected_levels:
+            st.markdown("**Expected Risk Levels:**")
+            st.markdown(", ".join(f"`{level}`" for level in expected_levels))
 
 st.divider()
 st.subheader("Run Full Evaluation")

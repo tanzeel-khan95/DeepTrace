@@ -80,6 +80,24 @@ class Relationship(BaseModel):
         return round(v, 4)
 
 
+class Citation(BaseModel):
+    """Source citation for a fact (URL, domain, snippet, confidence)."""
+    fact_id:      str
+    url:          str
+    domain:       str
+    title:        str = ""
+    snippet:      str = ""
+    accessed_at:  str = ""
+    confidence:   float = 0.0
+
+    @field_validator("confidence")
+    @classmethod
+    def validate_confidence(cls, v: float) -> float:
+        if not 0.0 <= v <= 1.0:
+            raise ValueError(f"confidence must be 0.0–1.0, got {v}")
+        return round(v, 4)
+
+
 class RiskFlag(BaseModel):
     """A risk signal identified during the investigation."""
     flag_id:           str
@@ -152,6 +170,11 @@ class AgentState(TypedDict):
 
     # ── Graph ────────────────────────────────────────────────────────────────
     graph_populated: bool
+    graph_html:       Optional[str]
+    artifact_path:    Optional[str]
+
+    # ── Citations (source evidence) ─────────────────────────────────────────
+    citations:        Annotated[List[Citation], operator.add]
 
     # ── Quality tracking ─────────────────────────────────────────────────────
     confidence_map:    Dict[str, float]   # fact_id → final confidence score
@@ -177,6 +200,9 @@ def make_initial_state(target_name: str, target_context: str = "", run_id: Optio
         relationships=[],
         risk_flags=[],
         graph_populated=False,
+        graph_html=None,
+        artifact_path=None,
+        citations=[],
         confidence_map={},
         research_quality=0.0,
         loop_count=0,

@@ -62,7 +62,9 @@ def _sync_tavily_search(query: str) -> list:
                     "content": r.get("content", ""),
                     "relevance": relevance,
                     "source_domain": domain,
+                    "search_source": "tavily",
                 })
+        import pdb; pdb.set_trace()
 
         logger.info(f"[Tavily] Real search: '{query[:40]}' → {len(results)} results")
         return results

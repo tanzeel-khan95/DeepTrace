@@ -64,7 +64,7 @@ def main(target, context, env, run_eval, test_connections, stream):
     # ── Evaluation run ─────────────────────────────────────────────────────────
     if run_eval:
         console.print("[bold]Running evaluation set (3 personas)...[/bold]")
-        from mock_responses import ALL_EVAL_PERSONAS
+        from evaluation.eval_personas import ALL_EVAL_PERSONAS
         from pipeline import run_pipeline
         for persona in ALL_EVAL_PERSONAS:
             console.print(f"\n→ Evaluating: [cyan]{persona['name']}[/cyan]")

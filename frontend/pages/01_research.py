@@ -93,6 +93,10 @@ if submitted and target_name:
     for idx, (node_name, node_output) in enumerate(
         stream_pipeline(target_name, target_context, run_id=run_id), start=1
     ):
+        if node_name == "final_state":
+            st.session_state["final_state"] = node_output
+            continue
+
         now = time.perf_counter()
         duration = now - last_ts
         last_ts = now
@@ -141,6 +145,23 @@ if submitted and target_name:
     st.session_state["final_report"] = synth.get("final_report") or ""
     st.session_state["risk_flags"] = risk.get("risk_flags") or []
     st.session_state["extracted_facts"] = deep.get("extracted_facts") or []
+
+    # final_state is set when the pipeline yields "final_state" (merged state from checkpointer)
+    if "final_state" not in st.session_state or not st.session_state["final_state"]:
+        # Fallback: build a minimal final_state from all_chunks for Report/Graph pages
+        graph_out = all_chunks.get("graph_builder") or {}
+        st.session_state["final_state"] = {
+            "target_name": target_name,
+            "run_id": run_id,
+            "final_report": st.session_state["final_report"],
+            "risk_flags": st.session_state["risk_flags"],
+            "extracted_facts": st.session_state["extracted_facts"],
+            "entities": deep.get("entities") or [],
+            "relationships": deep.get("relationships") or [],
+            "citations": deep.get("citations") or [],
+            "graph_html": graph_out.get("graph_html"),
+            "artifact_path": graph_out.get("artifact_path"),
+        }
 
 
 # If there is a previous run, keep its timeline visible when the page reloads

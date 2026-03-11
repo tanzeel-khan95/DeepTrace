@@ -124,6 +124,19 @@ def call_llm(
         model=model,
     )
 
+    # Structured audit logging
+    try:
+        from utils.audit_logger import log_llm_call
+
+        log_llm_call(
+            agent="anthropic_client",
+            model=model,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+        )
+    except Exception as e:  # best-effort, never break main flow
+        logger.debug(f"[AuditLog] LLM call audit logging failed: {e}")
+
     # Save to cache
     if LLM_CACHE_ENABLED:
         save_to_cache(system_prompt, user_message, model, text)

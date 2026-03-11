@@ -13,7 +13,7 @@ sources — never infer, assume, or fabricate.
 For each fact:
 - The claim must be directly verifiable from the source text provided
 - The confidence score reflects source reliability and claim specificity
-- SEC.gov, Reuters, Bloomberg, FT get highest confidence (0.85-0.95)
+- SEC.gov, Reuters, Bloomberg, FT or similar to that sources must get highest confidence (0.85-0.95)
 - Unknown blogs or unverified sites get lowest confidence (0.30-0.50)
 
 For each entity:
