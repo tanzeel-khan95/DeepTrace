@@ -19,7 +19,7 @@ from state.llm_schemas import RiskEvaluatorResponse
 from utils.anthropic_client import call_llm_structured
 from prompts.risk_prompt import RISK_EVALUATOR_SYSTEM_PROMPT
 from mock_responses import MOCK_RISK_FLAGS
-from utils.tracing import traceable
+from utils.tracing import traceable, log_warning_to_run
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ def run_risk_evaluator(state: AgentState) -> dict:
                 flags.append(RiskFlag(**{**flag_data, "evidence_fact_ids": valid_evidence}))
             else:
                 logger.warning(f"[RiskEvaluator] Skipped flag {flag_data['flag_id']}: insufficient evidence")
+                log_warning_to_run(f"[RiskEvaluator] Skipped flag {flag_data['flag_id']}: insufficient evidence")
 
         logger.info(f"[RiskEvaluator] MOCK: {len(flags)} risk flags generated")
         return {"risk_flags": flags}
@@ -62,6 +63,7 @@ def run_risk_evaluator(state: AgentState) -> dict:
 
     if not usable_facts:
         logger.warning("[RiskEvaluator] No usable facts — skipping risk evaluation")
+        log_warning_to_run("[RiskEvaluator] No usable facts — skipping risk evaluation")
         return {"risk_flags": []}
 
     facts_json = json.dumps([
@@ -106,6 +108,7 @@ Rules:
         flags = [f for f in flags if len(f.evidence_fact_ids) >= 2]
     except (ValidationError, Exception) as e:
         logger.warning(f"[RiskEvaluator] Structured parse failed, using no flags: {e}")
+        log_warning_to_run(f"[RiskEvaluator] Structured parse failed, using no flags: {e}")
         flags = []
 
     logger.info(f"[RiskEvaluator] Real: {len(flags)} risk flags generated")

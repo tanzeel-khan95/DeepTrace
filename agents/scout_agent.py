@@ -16,7 +16,7 @@ import logging
 from config import USE_MOCK, MIN_RELEVANCE, MAX_SEARCH_RESULTS_PER_QUERY
 from state.agent_state import AgentState
 from mock_responses import MOCK_SCOUT_RESULTS
-from utils.tracing import traceable
+from utils.tracing import traceable, log_warning_to_run
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +94,7 @@ async def _async_scout(state: AgentState) -> dict:
 
     if not new_queries:
         logger.warning("[Scout] No new queries to execute")
+        log_warning_to_run("[Scout] No new queries to execute")
         return {"raw_results": [], "queries_issued": []}
 
     logger.info(f"[Scout] Executing {len(new_queries)} queries in parallel")
@@ -108,6 +109,7 @@ async def _async_scout(state: AgentState) -> dict:
             all_results.extend(batch)
         else:
             logger.warning(f"[Scout] Query batch failed: {batch}")
+            log_warning_to_run(f"[Scout] Query batch failed: {batch}")
 
     # Filter by relevance and sort so that, when duplicates exist, the
     # highest-relevance copy is seen first.

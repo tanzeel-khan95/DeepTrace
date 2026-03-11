@@ -91,3 +91,68 @@ def configure_langsmith() -> bool:
     logger.info(f"[LangSmith] Tracing active — project: {LANGCHAIN_PROJECT}")
     return True
 
+
+def log_llm_run(model: str, input_tokens: int, output_tokens: int) -> None:
+    """
+    Log an LLM call to the current LangSmith run as a child span with model and token usage.
+    Uses RunTree.set(usage_metadata=...) so LangSmith Tokens/Cost columns and trace tree show usage.
+    No-op if tracing is disabled or LangSmith unavailable. Best-effort; never raises.
+    """
+    from config import LANGCHAIN_TRACING
+
+    if not LANGCHAIN_TRACING or not _langsmith_available:
+        return
+    try:
+        from langsmith.run_helpers import get_current_run_tree
+
+        run = get_current_run_tree()
+        if run is None:
+            return
+        total = input_tokens + output_tokens
+        child = run.create_child(
+            name=f"LLM: {model}",
+            run_type="llm",
+            inputs={},
+            outputs={},
+        )
+        # LangSmith expects usage in extra.metadata.usage_metadata (input_tokens, output_tokens, total_tokens)
+        # so the Tokens/Cost columns and trace tree display correctly.
+        child.set(
+            usage_metadata={
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": total,
+            }
+        )
+        child.end(
+            metadata={
+                "model": model,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": total,
+            }
+        )
+    except Exception as e:
+        logger.debug("[LangSmith] log_llm_run failed: %s", e)
+
+
+def log_warning_to_run(message: str) -> None:
+    """
+    Append a warning message to the current LangSmith run's metadata.
+    No-op if tracing is disabled or LangSmith unavailable. Best-effort; never raises.
+    """
+    from config import LANGCHAIN_TRACING
+
+    if not LANGCHAIN_TRACING or not _langsmith_available:
+        return
+    try:
+        from langsmith.run_helpers import get_current_run_tree
+
+        run = get_current_run_tree()
+        if run is None:
+            return
+        existing = list(run.extra.get("warnings", [])) if run.extra else []
+        run.add_metadata({"warnings": existing + [message]})
+    except Exception as e:
+        logger.debug("[LangSmith] log_warning_to_run failed: %s", e)
+

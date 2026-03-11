@@ -19,7 +19,7 @@ LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", f"DeepTrace")
 LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
 
 # ── Loop / token controls (Phase 2 cost constraint: target <$0.01/run in dev) ─
-MAX_LOOPS:  dict = {"dev": 3,   "staging": 3, "prod": 5}
+MAX_LOOPS:  dict = {"dev": 5,   "staging": 3, "prod": 5}
 MAX_TOKENS: dict = {"dev": 5000, "staging": 1500, "prod": 3000}
 QUALITY_THRESHOLD: float = 0.70   # Stop loop when research_quality >= this
 
@@ -27,8 +27,8 @@ QUALITY_THRESHOLD: float = 0.70   # Stop loop when research_quality >= this
 # Phase 1: these are never called (USE_MOCK=true). Defined now for Phase 2.
 MODEL_CONFIG: dict = {
     "dev": {
-        "supervisor":     "claude-opus-4-5-20251101",
-        "scout":          "claude-opus-4-5-20251101",
+        "supervisor":     "claude-haiku-4-5-20251001",
+        "scout":          "claude-haiku-4-5-20251001",
         "deep_dive":      "gpt-4.1-mini",
         "risk_evaluator": "claude-haiku-4-5-20251001",
         "graph_builder":  "claude-haiku-4-5-20251001",

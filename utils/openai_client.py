@@ -91,6 +91,11 @@ def call_openai(
             output_tokens=getattr(usage, "completion_tokens", 0),
             model=model,
         )
+        try:
+            from utils.tracing import log_llm_run
+            log_llm_run(model, getattr(usage, "prompt_tokens", 0), getattr(usage, "completion_tokens", 0))
+        except Exception:
+            pass
 
     if cache_enabled and use_cache:
         save_to_cache(system_prompt, user_message, model, content)
@@ -144,6 +149,11 @@ def call_openai_structured(
                 output_tokens=getattr(usage, "completion_tokens", 0),
                 model=model,
             )
+            try:
+                from utils.tracing import log_llm_run
+                log_llm_run(model, getattr(usage, "prompt_tokens", 0), getattr(usage, "completion_tokens", 0))
+            except Exception:
+                pass
 
         if cache_enabled and use_cache:
             save_to_cache(

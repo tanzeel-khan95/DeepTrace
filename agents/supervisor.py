@@ -26,7 +26,7 @@ from mock_responses import (
     MOCK_SUPERVISOR_LOOP_2,
     MOCK_SUPERVISOR_FINAL,
 )
-from utils.tracing import traceable
+from utils.tracing import traceable, log_warning_to_run
 
 logger = logging.getLogger(__name__)
 
@@ -53,14 +53,32 @@ def supervisor_plan(state: AgentState) -> dict:
 
     # ── Phase 2+: Structured LLM call (enforced JSON schema) ─────────────────
     model = MODELS["supervisor"]
+
+    facts = state["extracted_facts"]
+    facts_summary = "\n".join(
+        f"- [{f.category}] {f.claim} (conf={f.confidence:.2f}, src={f.source_domain})"
+        for f in facts[:25]
+    ) if facts else "None yet"
+
+    risk_flags = state.get("risk_flags", [])
+    risk_summary = "\n".join(
+        f"- [{rf.severity}] {rf.title}: {rf.description[:120]}"
+        for rf in risk_flags
+    ) if risk_flags else "None yet"
+
     user_msg = f"""Research target: {state['target_name']}
-Context: {state.get('target_context', 'No additional context')}
+Target context: {state.get('target_context', 'No additional context')}
 Loop number: {state['loop_count'] + 1}
 Queries already issued: {json.dumps(state['queries_issued'])}
 Gaps remaining: {json.dumps(state.get('gaps_remaining', []))}
-Facts found so far: {len(state['extracted_facts'])}
 
-Generate the next batch of research queries covering all 5 categories."""
+Key facts discovered so far ({len(facts)} total):
+{facts_summary}
+
+Risk signals identified so far:
+{risk_summary}
+
+Generate the next batch of targeted research queries. Adapt strategy to the current loop number and findings above."""
 
     try:
 
@@ -81,6 +99,7 @@ Generate the next batch of research queries covering all 5 categories."""
 
     except (ValidationError, Exception) as e:
         logger.warning(f"[Supervisor::plan] Structured parse failed, using fallback: {e}")
+        log_warning_to_run(f"[Supervisor::plan] Structured parse failed, using fallback: {e}")
         research_plan = [f"{state['target_name']} background career"]
         gaps_remaining = ["General background not yet found"]
 
@@ -138,6 +157,7 @@ Score research quality 0.0-1.0 and identify remaining gaps."""
         gaps = list(parsed.gaps_remaining) if parsed.gaps_remaining else []
     except (ValidationError, Exception) as e:
         logger.warning(f"[Supervisor::reflect] Structured parse failed, using fallback: {e}")
+        log_warning_to_run(f"[Supervisor::reflect] Structured parse failed, using fallback: {e}")
         quality = min(0.40 * state["loop_count"], 0.82)
         gaps = []
 

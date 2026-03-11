@@ -132,6 +132,11 @@ def call_gemini(
     in_tokens, out_tokens = _estimate_usage_from_response(response)
     if in_tokens or out_tokens:
         record_spend(input_tokens=in_tokens, output_tokens=out_tokens, model=model)
+    try:
+        from utils.tracing import log_llm_run
+        log_llm_run(model, in_tokens, out_tokens)
+    except Exception:
+        pass
 
     if cache_enabled and use_cache:
         save_to_cache(system_prompt, user_message, model, text)
@@ -206,6 +211,11 @@ def call_gemini_structured(
     in_tokens, out_tokens = _estimate_usage_from_response(response)
     if in_tokens or out_tokens:
         record_spend(input_tokens=in_tokens, output_tokens=out_tokens, model=model)
+    try:
+        from utils.tracing import log_llm_run
+        log_llm_run(model, in_tokens, out_tokens)
+    except Exception:
+        pass
 
     parsed = response_model.model_validate_json(raw_json or "{}")
 

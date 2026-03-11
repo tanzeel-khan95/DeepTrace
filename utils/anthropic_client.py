@@ -137,6 +137,12 @@ def call_llm(
     except Exception as e:  # best-effort, never break main flow
         logger.debug(f"[AuditLog] LLM call audit logging failed: {e}")
 
+    try:
+        from utils.tracing import log_llm_run
+        log_llm_run(model, response.usage.input_tokens, response.usage.output_tokens)
+    except Exception:
+        pass
+
     # Save to cache
     if LLM_CACHE_ENABLED:
         save_to_cache(system_prompt, user_message, model, text)
@@ -278,6 +284,11 @@ def call_llm_structured(
             output_tokens=response.usage.output_tokens,
             model=model,
         )
+        try:
+            from utils.tracing import log_llm_run
+            log_llm_run(model, response.usage.input_tokens, response.usage.output_tokens)
+        except Exception:
+            pass
 
         if LLM_CACHE_ENABLED and parsed is not None:
             # Cache as JSON string for future replays

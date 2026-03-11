@@ -23,7 +23,7 @@ from evaluation.confidence_scorer import score_facts_batch, get_domain_trust
 from evaluation.fact_utils import merge_duplicate_facts
 from mock_responses import MOCK_DEEP_DIVE_RESULTS
 from utils.citation_builder import build_citations
-from utils.tracing import traceable
+from utils.tracing import traceable, log_warning_to_run
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ def run_deep_dive(state: AgentState) -> dict:
                 citations.append(Citation(**c))
             except Exception as e:
                 logger.warning(f"[DeepDive] Invalid citation: {e}")
+                log_warning_to_run(f"[DeepDive] Invalid citation: {e}")
         logger.info(f"[DeepDive] MOCK: {len(facts)} facts, {len(entities)} entities validated")
         return {
             "extracted_facts": facts,
@@ -82,6 +83,7 @@ def run_deep_dive(state: AgentState) -> dict:
 
     if not results:
         logger.warning("[DeepDive] No raw_results to process")
+        log_warning_to_run("[DeepDive] No raw_results to process")
         return {"extracted_facts": [], "entities": [], "relationships": [], "confidence_map": {}, "citations": []}
 
     content_blocks = []
@@ -146,6 +148,7 @@ def run_deep_dive(state: AgentState) -> dict:
         rels = list(parsed.relationships) if parsed.relationships else []
     except (ValidationError, Exception) as e:
         logger.warning(f"[DeepDive] Structured parse failed, using empty extraction: {e}")
+        log_warning_to_run(f"[DeepDive] Structured parse failed, using empty extraction: {e}")
         facts, entities, rels = [], [], []
 
     # Collapse near-duplicate facts before scoring and citation building.
@@ -161,6 +164,7 @@ def run_deep_dive(state: AgentState) -> dict:
             citations.append(Citation(**c))
         except Exception as e:
             logger.warning(f"[DeepDive] Invalid citation: {e}")
+            log_warning_to_run(f"[DeepDive] Invalid citation: {e}")
 
     logger.info(f"[DeepDive] Real: {len(facts)} facts, {len(entities)} entities, {len(rels)} rels")
     return {
