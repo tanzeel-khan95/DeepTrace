@@ -27,24 +27,24 @@ QUALITY_THRESHOLD: float = 0.70   # Stop loop when research_quality >= this
 # Phase 1: these are never called (USE_MOCK=true). Defined now for Phase 2.
 MODEL_CONFIG: dict = {
     "dev": {
-        "supervisor":     "claude-haiku-4-5-20251001",
-        "scout":          "claude-haiku-4-5-20251001",
-        "deep_dive":      "claude-haiku-4-5-20251001",
+        "supervisor":     "claude-opus-4-5-20251101",
+        "scout":          "claude-opus-4-5-20251101",
+        "deep_dive":      "gpt-4.1-mini",
         "risk_evaluator": "claude-haiku-4-5-20251001",
         "graph_builder":  "claude-haiku-4-5-20251001",
     },
     "staging": {
         "supervisor":     "claude-opus-4-5-20251101",
-        "scout":          "gpt-4.1",
-        "deep_dive":      "gemini-2.5-pro",
-        "risk_evaluator": "claude-sonnet-4-6-20251120",
+        "scout":          "claude-opus-4-5-20251101",
+        "deep_dive":      "gpt-4.1-mini",
+        "risk_evaluator": "claude-haiku-4-5-20251001",
         "graph_builder":  "claude-haiku-4-5-20251001",
     },
     "prod": {
         "supervisor":     "claude-opus-4-5-20251101",
-        "scout":          "gpt-4.1",
-        "deep_dive":      "gemini-2.5-pro",
-        "risk_evaluator": "claude-sonnet-4-6-20251120",
+        "scout":          "claude-opus-4-5-20251101",
+        "deep_dive":      "gpt-4.1-mini",
+        "risk_evaluator": "claude-haiku-4-5-20251001",
         "graph_builder":  "claude-haiku-4-5-20251001",
     },
 }
@@ -52,11 +52,17 @@ MODEL_CONFIG: dict = {
 # ── Active model shortcuts ────────────────────────────────────────────────────
 MODELS = MODEL_CONFIG[ENV]
 
-# ── Haiku model string (Phase 2 convenience constant) ─────────────────────────
+# ── Model groups for provider routing ─────────────────────────────────────────
 HAIKU_MODEL = "claude-haiku-4-5-20251001"
+GROQ_MODELS = {"llama-3.3-70b-versatile", "deepseek-r1-distill-llama-70b"}
+GEMINI_MODELS = {"gemini-2.5-pro"}
+OPENAI_MODELS = {"gpt-4.1-mini"}
 
-# ── Anthropic API key ─────────────────────────────────────────────────────────
+# ── Anthropic / Groq / Gemini / OpenAI API keys ──────────────────────────────
 ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 
 # ── LLM cache directory (Phase 2 record-replay) ───────────────────────────────
 LLM_CACHE_DIR: str = os.getenv("LLM_CACHE_DIR", ".llm_cache")
@@ -106,6 +112,9 @@ GRAPH_ARTIFACT_DIR: str = os.getenv("GRAPH_ARTIFACT_DIR", ".graph_artifacts")
 LLM_MAX_RETRIES: int = int(os.getenv("LLM_MAX_RETRIES", "3"))
 LLM_RETRY_BASE_DELAY: float = float(os.getenv("LLM_RETRY_BASE_DELAY", "1.0"))
 LLM_REQUESTS_PER_MIN: int = int(os.getenv("LLM_REQUESTS_PER_MIN", "50"))  # Haiku tier 1
+GROQ_REQUESTS_PER_MIN: int = int(os.getenv("GROQ_REQUESTS_PER_MIN", "30"))
+GEMINI_REQUESTS_PER_MIN: int = int(os.getenv("GEMINI_REQUESTS_PER_MIN", "10"))
+OPENAI_REQUESTS_PER_MIN: int = int(os.getenv("OPENAI_REQUESTS_PER_MIN", "30"))
 
 # ── Search feature toggles ───────────────────────────────────────────────────
 HAIKU_WEB_SEARCH_ENABLED: bool = os.getenv("HAIKU_WEB_SEARCH_ENABLED", "true").lower() == "true"
@@ -130,6 +139,14 @@ def validate_config() -> list:
             errors.append("ANTHROPIC_API_KEY — required when USE_MOCK=false")
         if not TAVILY_API_KEY:
             errors.append("TAVILY_API_KEY — required for real search")
+
+        deep_dive_model = MODEL_CONFIG.get(ENV, {}).get("deep_dive")
+        if deep_dive_model in GROQ_MODELS and not GROQ_API_KEY:
+            errors.append("GROQ_API_KEY — required when deep_dive model is a Groq model")
+        if deep_dive_model in GEMINI_MODELS and not GOOGLE_API_KEY:
+            errors.append("GOOGLE_API_KEY — required when deep_dive model is a Gemini model")
+        if deep_dive_model in OPENAI_MODELS and not OPENAI_API_KEY:
+            errors.append("OPENAI_API_KEY — required when deep_dive model is an OpenAI model")
 
     if LANGCHAIN_TRACING and not LANGCHAIN_API_KEY:
         errors.append("LANGCHAIN_API_KEY — required when LANGCHAIN_TRACING_V2=true")

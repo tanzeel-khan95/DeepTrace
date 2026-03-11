@@ -60,6 +60,9 @@ class TokenBucket:
 # Global rate limiter instances — one per external service
 _llm_bucket = None
 _search_bucket = None
+_groq_bucket = None
+_gemini_bucket = None
+_openai_bucket = None
 
 
 def get_llm_bucket() -> TokenBucket:
@@ -76,6 +79,36 @@ def get_search_bucket() -> TokenBucket:
     if _search_bucket is None:
         _search_bucket = TokenBucket(rate=20)  # Tavily free tier: ~20 req/min safe limit
     return _search_bucket
+
+
+def get_groq_bucket() -> TokenBucket:
+    """Rate limiter for Groq models."""
+    global _groq_bucket
+    if _groq_bucket is None:
+        from config import GROQ_REQUESTS_PER_MIN
+
+        _groq_bucket = TokenBucket(rate=GROQ_REQUESTS_PER_MIN)
+    return _groq_bucket
+
+
+def get_gemini_bucket() -> TokenBucket:
+    """Rate limiter for Gemini models."""
+    global _gemini_bucket
+    if _gemini_bucket is None:
+        from config import GEMINI_REQUESTS_PER_MIN
+
+        _gemini_bucket = TokenBucket(rate=GEMINI_REQUESTS_PER_MIN)
+    return _gemini_bucket
+
+
+def get_openai_bucket() -> TokenBucket:
+    """Rate limiter for OpenAI models."""
+    global _openai_bucket
+    if _openai_bucket is None:
+        from config import OPENAI_REQUESTS_PER_MIN
+
+        _openai_bucket = TokenBucket(rate=OPENAI_REQUESTS_PER_MIN)
+    return _openai_bucket
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -163,5 +196,28 @@ def _default_retryable() -> tuple:
         )
     except ImportError:
         base = ()
-    return base + (ConnectionError, TimeoutError, OSError)
+
+    try:
+        import groq as groq_sdk
+
+        groq_errors = (
+            getattr(groq_sdk, "RateLimitError", Exception),
+            getattr(groq_sdk, "APITimeoutError", Exception),
+            getattr(groq_sdk, "APIConnectionError", Exception),
+        )
+    except ImportError:
+        groq_errors = ()
+
+    try:
+        import openai as openai_sdk
+
+        openai_errors = (
+            getattr(openai_sdk, "RateLimitError", Exception),
+            getattr(openai_sdk, "APITimeoutError", Exception),
+            getattr(openai_sdk, "APIConnectionError", Exception),
+        )
+    except ImportError:
+        openai_errors = ()
+
+    return base + groq_errors + openai_errors + (ConnectionError, TimeoutError, OSError)
 

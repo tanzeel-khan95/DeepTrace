@@ -10,7 +10,8 @@ langsmith>=0.1.0
 # LLM SDKs (Phase 1: imported only inside USE_MOCK=false branches)
 anthropic>=0.50.0
 openai==1.50.0
-google-generativeai==0.8.0
+google-genai>=1.0.0
+groq==1.1.1
 
 # Structured output
 instructor==1.4.3
@@ -28,7 +29,8 @@ tavily-python==0.5.0
 streamlit==1.41.0
 plotly==5.24.0
 
-# HTTP / async
+# HTTP / async (httpx<0.28 required: openai 1.50 passes proxies to httpx, removed in 0.28)
+httpx<0.28
 aiohttp==3.11.0
 tenacity>=8.4.1,<9.0.0
 

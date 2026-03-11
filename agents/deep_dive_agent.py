@@ -11,10 +11,13 @@ Architecture position: third node in LangGraph pipeline, called after Scout.
 """
 import logging
 from pydantic import ValidationError
-from config import USE_MOCK, MODELS, MAX_TOKENS, ENV
+from config import USE_MOCK, MODELS, MAX_TOKENS, ENV, GROQ_MODELS, GEMINI_MODELS, OPENAI_MODELS
 from state.agent_state import AgentState, Citation, Fact, Entity, Relationship
 from state.llm_schemas import DeepDiveResponse
 from utils.anthropic_client import call_llm_structured
+from utils.groq_client import call_groq_structured
+from utils.gemini_client import call_gemini_structured
+from utils.openai_client import call_openai_structured
 from prompts.deep_dive_prompt import DEEP_DIVE_SYSTEM_PROMPT
 from evaluation.confidence_scorer import score_facts_batch, get_domain_trust
 from evaluation.fact_utils import merge_duplicate_facts
@@ -102,16 +105,42 @@ def run_deep_dive(state: AgentState) -> dict:
     - entity_ids must be unique strings (e001, e002, ...)
     - Only extract claims directly supported by the provided sources
     - confidence 0.0-1.0 based on source reliability and claim specificity
-    - entities_mentioned must reference names that appear in your entities list"""
+    - entities_mentioned must reference names that appear in your entities list
+    - Every entity must have a relation with at least one entity so it will not be an orphan node"""
 
     try:
-        parsed = call_llm_structured(
-            system_prompt=DEEP_DIVE_SYSTEM_PROMPT,
-            user_message=user_msg,
-            model=model,
-            max_tokens=MAX_TOKENS[ENV],
-            response_model=DeepDiveResponse,
-        )
+        if model in GROQ_MODELS:
+            parsed = call_groq_structured(
+                system_prompt=DEEP_DIVE_SYSTEM_PROMPT,
+                user_message=user_msg,
+                model=model,
+                max_tokens=MAX_TOKENS[ENV],
+                response_model=DeepDiveResponse,
+            )
+        elif model in GEMINI_MODELS:
+            parsed = call_gemini_structured(
+                system_prompt=DEEP_DIVE_SYSTEM_PROMPT,
+                user_message=user_msg,
+                model=model,
+                max_tokens=MAX_TOKENS[ENV],
+                response_model=DeepDiveResponse,
+            )
+        elif model in OPENAI_MODELS:
+            parsed = call_openai_structured(
+                system_prompt=DEEP_DIVE_SYSTEM_PROMPT,
+                user_message=user_msg,
+                model=model,
+                max_tokens=MAX_TOKENS[ENV],
+                response_model=DeepDiveResponse,
+            )
+        else:
+            parsed = call_llm_structured(
+                system_prompt=DEEP_DIVE_SYSTEM_PROMPT,
+                user_message=user_msg,
+                model=model,
+                max_tokens=MAX_TOKENS[ENV],
+                response_model=DeepDiveResponse,
+            )
         facts = list(parsed.extracted_facts) if parsed.extracted_facts else []
         entities = list(parsed.entities) if parsed.entities else []
         rels = list(parsed.relationships) if parsed.relationships else []

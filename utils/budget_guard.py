@@ -19,7 +19,9 @@ def record_spend(input_tokens: int, output_tokens: int, model: str) -> None:
         "claude-sonnet-4-6-20251120": {"in": 3.00,  "out": 15.00},
         "claude-haiku-4-5-20251001":  {"in": 1.00,  "out": 5.00},
         "gpt-4.1":                    {"in": 2.00,  "out": 8.00},
+        "gpt-4.1-mini":               {"in": 0.40,  "out": 1.60},
         "gemini-2.5-pro":             {"in": 1.25,  "out": 10.00},
+        "llama-3.3-70b-versatile":    {"in": 0.59,  "out": 0.79},
     }
     p = PRICE_PER_1M.get(model, {"in": 5.00, "out": 25.00})
     cost = (input_tokens / 1_000_000 * p["in"]) + (output_tokens / 1_000_000 * p["out"])

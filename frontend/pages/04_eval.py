@@ -12,7 +12,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import streamlit as st
 
-from config import USE_MOCK
 from evaluation.eval_set import ALL_EVAL_PERSONAS, SCORING_TARGETS
 from pipeline import run_pipeline
 
@@ -93,19 +92,6 @@ def _compute_criteria(persona, state):
 
 st.title("🎯 Evaluation Dashboard")
 st.markdown("Evaluation personas with expected findings and per-criterion expected vs actual.")
-
-# Sidebar: runtime mode and scoring targets
-st.sidebar.markdown("### Evaluation Mode")
-if USE_MOCK:
-    st.sidebar.warning(
-        "USE_MOCK=true — agents use fixture data. Set USE_MOCK=false in your environment for live LLM evaluation."
-    )
-else:
-    st.sidebar.success("USE_MOCK=false — using live LLM and search stack for evaluation.")
-
-st.sidebar.markdown("### Scoring Targets")
-for metric, target in SCORING_TARGETS.items():
-    st.sidebar.markdown(f"- **{metric}**: `{target}`")
 
 # Show evaluation personas and their expected ground truth
 for persona in ALL_EVAL_PERSONAS:

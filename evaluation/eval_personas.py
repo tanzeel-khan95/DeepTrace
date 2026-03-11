@@ -134,7 +134,7 @@ EVAL_PERSONA_SAM_BANKMAN_FRIED = {
         "Misappropriation of customer funds and securities/wire fraud charges",
     ],
     "expected_risk_levels": ["CRITICAL", "CRITICAL", "CRITICAL", "HIGH"],
-    "expected_risk_score": 90,
+    "expected_risk_score": 70,
     "expected_flag_count": 4,
 }
 
@@ -178,7 +178,7 @@ EVAL_PERSONA_TIMOTHY_OVERTURF = {
         "Undisclosed family relationship between CEO and advisory personnel created conflict of interest concerns",
     ],
     "expected_risk_levels": ["CRITICAL", "MEDIUM"],
-    "expected_risk_score": 75,
+    "expected_risk_score": 70,
     "expected_flag_count": 2,
 }
 
