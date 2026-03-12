@@ -1,14 +1,11 @@
 """
-haiku_search.py — Anthropic Haiku web search tool integration.
+Anthropic Haiku web search tool integration.
 
 Uses the Anthropic web_search_20250305 tool to run web searches via Haiku.
-This supplements Tavily results — useful when Tavily has low result counts
-or when targeted site-specific searches are needed.
+Supplements Tavily results when Tavily has low result counts or when
+targeted site-specific searches are needed.
 
 Returns the same result dict format as tavily_search.py for drop-in compatibility.
-
-Cost: ~$0.001-0.002 per search call (Haiku + web_search tool).
-Architecture position: called by agents/scout_agent.py as secondary source.
 """
 import asyncio
 import logging

@@ -1,5 +1,5 @@
 """
-02_graph.py — Phase 3: D3.js graph page with run history and artifact download.
+D3.js graph page with run history and artifact download.
 """
 import sys
 import os

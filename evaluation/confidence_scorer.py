@@ -1,14 +1,11 @@
 """
-confidence_scorer.py — Three-layer confidence scoring system for extracted facts.
+Three-layer confidence scoring system for extracted facts.
 
 Layer 1: Source domain trust (lookup table — free, instant)
 Layer 2: Cross-reference adjustment (count supporting vs contradicting sources)
-Layer 3: LLM faithfulness check (Phase 2+ only — expensive, used for risk flag evidence)
+Layer 3: LLM faithfulness check (optional; when absent, stubbed at 0.75)
 
 Final formula: (L1 × 0.30) + (L2_adjusted × 0.40) + (L3 × 0.30)
-In Phase 1: L3 is stubbed at 0.75 (neutral assumption).
-
-Architecture position: called by deep_dive_agent after each fact extraction.
 """
 import logging
 from typing import Dict, List
@@ -80,8 +77,7 @@ def apply_cross_reference(l1_score: float, supporting: int, contradicting: int) 
 
 def llm_faithfulness_stub() -> float:
     """
-    Layer 3 stub for Phase 1.
-    Phase 2+: replace with real Claude Sonnet 4.6 faithfulness check.
+    Layer 3 stub when no explicit LLM faithfulness score is provided.
     Returns neutral assumption of 0.75 so final score is not artificially penalised.
     """
     return 0.75
@@ -100,7 +96,7 @@ def compute_final_confidence(
         domain: Source domain (e.g. 'sec.gov')
         supporting_count: Number of sources supporting this claim
         contradicting_count: Number of sources contradicting this claim
-        l3_faithfulness: Optional explicit L3 score (Phase 2+). If None, uses stub.
+        l3_faithfulness: Optional explicit L3 score. If None, uses stub.
 
     Returns:
         Final confidence score 0.0–1.0

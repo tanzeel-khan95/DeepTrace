@@ -1,11 +1,8 @@
 """
-neo4j_manager.py — Neo4j driver, connection management, schema setup, and graph writes.
+Neo4j driver, connection management, schema setup, and graph writes.
 
-This is the only module that directly calls the Neo4j database.
-All write operations come through write_entities() and write_relationships().
-
-Architecture position: called by graph_builder agent and visualizer.
-Phase 1: Neo4j IS connected (it's the one real external service).
+Only module that directly calls the Neo4j database. All write operations
+come through write_entities() and write_relationships().
 """
 import logging
 from typing import List, Optional

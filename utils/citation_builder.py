@@ -1,11 +1,9 @@
 """
-citation_builder.py — Build source citations from facts and raw search results.
+Build source citations from facts and raw search results.
 
 Matches each fact's source_url to a raw result to attach title, snippet, and
 trust-based confidence. Citations are merged into AgentState for the report
 with the exact source URL, domain, snippet, and confidence.
-
-Architecture position: called by agents/deep_dive_agent.py after fact extraction.
 """
 import logging
 from datetime import datetime, timezone

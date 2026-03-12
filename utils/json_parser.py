@@ -1,11 +1,9 @@
 """
-json_parser.py — Safe JSON extraction from LLM responses.
+Safe JSON extraction from LLM responses.
 
 LLMs sometimes wrap JSON in markdown fences or add preamble text.
 This module strips that and returns a clean dict/list, or raises a
 structured error so agents can retry intelligently.
-
-Architecture position: imported by all agents in Phase 2+.
 """
 import json
 import logging

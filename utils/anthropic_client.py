@@ -1,5 +1,5 @@
 """
-anthropic_client.py — Singleton Anthropic client for DeepTrace.
+Singleton Anthropic client for DeepTrace.
 
 All agents import get_client() from here. This ensures:
   - The client is only instantiated once (not per-call)
@@ -9,9 +9,6 @@ All agents import get_client() from here. This ensures:
 
 Structured output: use call_llm_structured() with a Pydantic response_model to
 enforce JSON schema via Anthropic output_config — no raw text parsing.
-
-Architecture position: imported by all agents in Phase 2+.
-Never import anthropic directly in agent files.
 """
 import logging
 from typing import List,Optional, Type, TypeVar
@@ -38,7 +35,7 @@ def get_client():
         if not ANTHROPIC_API_KEY:
             raise RuntimeError(
                 "[AnthropicClient] ANTHROPIC_API_KEY is not set. "
-                "Add it to your .env file. See Phase 2 API Keys section."
+                "Add it to your .env file."
             )
         import anthropic
         _client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -303,7 +300,15 @@ def call_llm_structured(
             f"[LLM] model={model} (structured/parse) "
             f"in={response.usage.input_tokens} out={response.usage.output_tokens}"
         )
+        # When schema validation fails (e.g. RiskFlag with <2 evidence), SDK may return None
+        if parsed is None:
+            return response_model()
         return parsed
 
     except Exception as e:
         logger.error(f"[LLM] Error calling {model}: {e}")
+        try:
+            # Return empty response when model has default_factory for all fields (e.g. RiskEvaluatorResponse)
+            return response_model()
+        except Exception:
+            raise

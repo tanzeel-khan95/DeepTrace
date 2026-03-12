@@ -1,10 +1,8 @@
 """
-agent_state.py — All Pydantic schemas and the AgentState TypedDict for DeepTrace.
+Pydantic schemas and AgentState TypedDict for DeepTrace.
 
-This is the single source of truth for data structures. Every agent reads from
-and writes to AgentState. Pydantic models enforce validation at every boundary.
-
-Architecture position: imported by all agents, pipeline, confidence scorer, and tests.
+Single source of truth for data structures. Every agent reads from and writes to
+AgentState. Pydantic models enforce validation at every boundary.
 """
 import operator
 import uuid

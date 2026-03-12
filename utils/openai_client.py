@@ -184,6 +184,7 @@ def call_openai_structured(
     content = response.choices[0].message.content or ""
     usage = getattr(response, "usage", None)
 
+    # #region agent log
     try:
         return _parse_and_record(content, usage)
     except ValidationError as e:
@@ -192,6 +193,13 @@ def call_openai_structured(
             model,
             e,
         )
+        try:
+            import json as _j
+            _log_path = "/home/tanzeel/Projects/DeepTrace/.cursor/debug-d62e4c.log"
+            with open(_log_path, "a") as _f:
+                _f.write(_j.dumps({"hypothesisId": "H1", "location": "openai_client:first_validation_error", "message": "ValidationError on first attempt", "data": {"model": model, "error_str": str(e)[:500], "content_preview": (content or "")[:400], "attempt": 1}, "timestamp": __import__("time").time() * 1000}) + "\n")
+        except Exception:
+            pass
 
         # One corrective retry with explicit error message
         corrective_user = (
@@ -214,4 +222,14 @@ def call_openai_structured(
                 model,
                 e2,
             )
+            try:
+                import json as _j
+                _log_path = "/home/tanzeel/Projects/DeepTrace/.cursor/debug-d62e4c.log"
+                with open(_log_path, "a") as _f:
+                    _f.write(_j.dumps({"hypothesisId": "H2", "location": "openai_client:retry_validation_error", "message": "ValidationError after retry", "data": {"model": model, "error_str": str(e2)[:500], "content_preview": (content or "")[:400], "attempt": 2}, "timestamp": __import__("time").time() * 1000}) + "\n")
+                with open(_log_path, "a") as _f:
+                    _f.write(_j.dumps({"hypothesisId": "H5", "location": "openai_client:returning_empty", "message": "Returning empty response_model() after double failure", "data": {"response_model": response_model.__name__}, "timestamp": __import__("time").time() * 1000}) + "\n")
+            except Exception:
+                pass
             return response_model()  # type: ignore[call-arg]
+    # #endregion

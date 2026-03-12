@@ -1,10 +1,8 @@
 """
-app.py — Streamlit multi-page application entrypoint for DeepTrace.
+Streamlit multi-page application entrypoint for DeepTrace.
 
 Configures page, applies dark theme CSS, and provides shared session state.
 Run with: streamlit run frontend/app.py
-
-Architecture position: frontend entrypoint, imports from pipeline.py.
 """
 # Load .env from project root so USE_MOCK, API keys, etc. are set before any config import
 import os

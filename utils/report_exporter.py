@@ -1,10 +1,8 @@
 """
-report_exporter.py — Export pipeline reports to PDF.
+Export pipeline reports to PDF.
 
 Converts the final_report markdown string + risk flags + citations into
 a styled HTML document, then uses weasyprint to render it as a PDF.
-
-Architecture position: called from Streamlit frontend/pages/03_report.py.
 """
 import logging
 import os

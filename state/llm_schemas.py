@@ -1,11 +1,8 @@
 """
-llm_schemas.py — Pydantic response schemas for structured LLM output.
+Pydantic response schemas for structured LLM output.
 
 Used with Anthropic output_config to enforce JSON shape. Single source of truth
 for what each agent's LLM call must return. Avoids raw text + fragile parsing.
-
-Architecture position: imported by anthropic_client and agents when calling
-call_llm_structured().
 """
 from typing import List, Literal, Dict, Optional
 

@@ -1,7 +1,5 @@
 """
-deep_dive_prompt.py — System prompt for Deep Dive Agent (Haiku/Gemini).
-
-Architecture position: imported by agents/deep_dive_agent.py.
+System prompt for Deep Dive Agent (Haiku/Gemini).
 """
 
 DEEP_DIVE_SYSTEM_PROMPT = """You are a precise intelligence extraction specialist.

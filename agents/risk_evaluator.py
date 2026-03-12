@@ -1,14 +1,11 @@
 """
-agents/risk_evaluator.py — Risk Evaluator Agent.
+Risk Evaluator Agent.
 
 Analyses all extracted facts to identify risk flags with severity scoring.
-Runs ONCE on the final research loop only.
+Runs once on the final research loop only.
 Every RiskFlag must cite minimum 2 evidence fact_ids with confidence >= 0.50.
 
-Phase 1 (USE_MOCK=true): returns MOCK_RISK_FLAGS fixture directly.
-Phase 2+ (USE_MOCK=false): calls Haiku in dev for risk evaluation.
-
-Architecture position: fourth node in LangGraph pipeline, runs after loop convergence.
+When USE_MOCK=true returns fixture data; otherwise calls Haiku for risk evaluation.
 """
 import json
 import logging
@@ -103,7 +100,7 @@ Rules:
             response_model=RiskEvaluatorResponse,
         )
 
-        flags = list(parsed.risk_flags) if parsed.risk_flags else []
+        flags = list(parsed.risk_flags) if (parsed and parsed.risk_flags) else []
         # Filter to only flags with >= 2 evidence (schema should enforce; double-check)
         flags = [f for f in flags if len(f.evidence_fact_ids) >= 2]
     except (ValidationError, Exception) as e:

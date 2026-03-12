@@ -1,10 +1,7 @@
 """
-eval_set.py — Evaluation set definitions and ground truth for all personas.
+Evaluation set definitions and ground truth for all personas.
 
-Used by LangSmith evaluators in Phase 3+ to score fact recall, risk precision,
-and hallucination rate.
-
-Architecture position: imported by langsmith_eval.py and frontend/pages/04_eval.py.
+Used by LangSmith evaluators to score fact recall, risk precision, and hallucination rate.
 """
 from evaluation.eval_personas import (
     ALL_EVAL_PERSONAS,

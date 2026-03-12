@@ -1,5 +1,5 @@
 """
-03_report.py — Phase 3: Report page with citations, clickable links, PDF export.
+Report page with citations, clickable links, PDF export.
 """
 import sys
 import os

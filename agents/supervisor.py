@@ -1,5 +1,5 @@
 """
-agents/supervisor.py — Supervisor Agent for DeepTrace.
+Supervisor Agent for DeepTrace.
 
 Responsibilities:
   - plan(): Generate targeted research queries covering 5 categories
@@ -7,11 +7,7 @@ Responsibilities:
   - synthesise(): Generate final markdown risk report
   - route(): Decide whether to continue looping or proceed to risk evaluation
 
-In Phase 1 (USE_MOCK=true): all three functions return mock fixtures.
-In Phase 2+ (USE_MOCK=false): calls Claude Haiku 4.5 in dev.
-
-Architecture position: first and last node in the LangGraph pipeline.
-Called by pipeline.py via StateGraph node registration.
+When USE_MOCK=true, returns mock fixtures; otherwise calls Claude Haiku in dev.
 """
 import json
 import logging
@@ -51,7 +47,7 @@ def supervisor_plan(state: AgentState) -> dict:
             "loop_count":     state["loop_count"] + 1,
         }
 
-    # ── Phase 2+: Structured LLM call (enforced JSON schema) ─────────────────
+    # Structured LLM call (enforced JSON schema)
     model = MODELS["supervisor"]
 
     facts = state["extracted_facts"]
@@ -228,7 +224,7 @@ Be concise. Focus on evidence-backed claims only."""
     )
     report = raw.strip()
     if not report:
-        report = f"# Report: {state['target_name']}\n\nInsufficient data to generate report in Phase 2 dev mode."
+        report = f"# Report: {state['target_name']}\n\nInsufficient data to generate report."
     logger.info(f"[Supervisor::synthesise] Real: report={len(report)} chars")
     return {"final_report": report}
 

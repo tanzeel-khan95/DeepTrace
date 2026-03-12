@@ -1,7 +1,5 @@
 """
-risk_prompt.py — System prompt for Risk Evaluator Agent (Haiku/Sonnet).
-
-Architecture position: imported by agents/risk_evaluator.py.
+System prompt for Risk Evaluator Agent (Haiku/Sonnet).
 """
 
 RISK_EVALUATOR_SYSTEM_PROMPT = """You are a professional risk analyst specialising in

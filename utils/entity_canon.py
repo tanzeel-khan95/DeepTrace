@@ -1,5 +1,5 @@
 """
-entity_canon.py — Entity name canonicalization and deduplication.
+Entity name canonicalization and deduplication.
 
 Merges near-duplicate entities before writing to Neo4j.
 Uses string similarity (difflib) — no ML model needed.
@@ -8,8 +8,6 @@ Examples of duplicates this catches:
   "Timothy Overturf"  ↔  "Tim Overturf"       → merge to "Timothy Overturf"
   "Sisu Capital LLC"  ↔  "Sisu Capital"        → merge to "Sisu Capital LLC"
   "SEC"               ↔  "U.S. Securities and Exchange Commission" → keep both (too different)
-
-Architecture position: called by agents/graph_builder.py before Neo4j write.
 """
 import logging
 from difflib import SequenceMatcher

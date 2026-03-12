@@ -1,8 +1,7 @@
 """
-graph_prompt.py — System prompt for Graph Builder Agent (Haiku).
+System prompt for Graph Builder Agent (Haiku).
 
-Phase 2: Used to validate and clean entity/relationship data before Neo4j write.
-Architecture position: imported by agents/graph_builder.py.
+Validates and cleans entity/relationship data before Neo4j write.
 """
 
 GRAPH_BUILDER_SYSTEM_PROMPT = """You are a graph data specialist.

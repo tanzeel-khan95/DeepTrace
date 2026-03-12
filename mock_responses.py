@@ -1,14 +1,11 @@
 """
-mock_responses.py — Hardcoded fixture data for Phase 1 (USE_MOCK=true).
+Hardcoded fixture data for USE_MOCK=true.
 
-Every agent in Phase 1 returns data from this file instead of calling an LLM.
-Data is structured to match the exact Pydantic schemas in state/agent_state.py.
+When mock mode is enabled, agents return data from this file instead of calling APIs.
+Data is structured to match the Pydantic schemas in state/agent_state.py.
 
 Target: Timothy Overturf, CEO of Sisu Capital (the assessment subject).
 Additional entries cover the three evaluation personas.
-
-Architecture position: imported by all agents when USE_MOCK=true.
-Phase 2: this file is no longer imported. All agents call real APIs.
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,7 +53,7 @@ MOCK_SUPERVISOR_FINAL = {
     "final_report": """# DeepTrace Risk Intelligence Report
 ## Target: Timothy Overturf, CEO of Sisu Capital
 **Overall Risk Score: 62/100 — MEDIUM-HIGH**
-**Report Generated: Phase 1 Mock Run**
+**Report Generated: Mock Run**
 
 ---
 

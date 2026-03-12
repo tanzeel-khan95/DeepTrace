@@ -1,16 +1,11 @@
 """
-llm_cache.py — Record-and-replay LLM response cache for Phase 2 development.
+Record-and-replay LLM response cache.
 
 Saves every real API response to .llm_cache/{hash}.json on first call.
 Subsequent identical calls (same model + same prompts) return the cached response.
 
-This means you can iterate on Streamlit UI, report formatting, and graph layout
-without paying for repeated identical research runs.
-
 Toggle: LLM_CACHE_ENABLED=true in .env (default true in dev).
 Clear:  rm -rf .llm_cache/
-
-Architecture position: called by utils/anthropic_client.py.
 """
 import hashlib
 import json

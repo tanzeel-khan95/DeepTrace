@@ -1,10 +1,8 @@
 """
-01_research.py — Research page: target input and live agent stream.
+Research page: target input and live agent stream.
 
 Accepts target name, runs the DeepTrace pipeline with streaming,
 and displays agent activity in real time.
-
-Architecture position: primary user-facing page, calls pipeline.stream_pipeline().
 """
 import sys
 import os

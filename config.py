@@ -1,10 +1,8 @@
 """
-config.py — DeepTrace central configuration.
+DeepTrace central configuration.
 
 Reads environment variables and exposes typed constants used by every module.
 ENV controls which model tier is active. USE_MOCK bypasses all API calls.
-
-Architecture position: imported by all agents, pipeline, and utilities.
 """
 import os
 from typing import Literal
@@ -18,13 +16,12 @@ LANGCHAIN_TRACING: bool = os.getenv("LANGCHAIN_TRACING_V2", "false").lower() == 
 LANGCHAIN_PROJECT: str = os.getenv("LANGCHAIN_PROJECT", f"DeepTrace")
 LANGCHAIN_API_KEY: str = os.getenv("LANGCHAIN_API_KEY", "")
 
-# ── Loop / token controls (Phase 2 cost constraint: target <$0.01/run in dev) ─
-MAX_LOOPS:  dict = {"dev": 5,   "staging": 3, "prod": 5}
+# ── Loop / token controls ─────────────────────────────────────────────────────
+MAX_LOOPS:  dict = {"dev": 3,   "staging": 5, "prod": 5}
 MAX_TOKENS: dict = {"dev": 5000, "staging": 1500, "prod": 3000}
 QUALITY_THRESHOLD: float = 0.70   # Stop loop when research_quality >= this
 
 # ── Model assignments per environment ────────────────────────────────────────
-# Phase 1: these are never called (USE_MOCK=true). Defined now for Phase 2.
 MODEL_CONFIG: dict = {
     "dev": {
         "supervisor":     "claude-haiku-4-5-20251001",
@@ -64,14 +61,14 @@ GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 
-# ── LLM cache directory (Phase 2 record-replay) ───────────────────────────────
+# ── LLM cache directory ──────────────────────────────────────────────────────
 LLM_CACHE_DIR: str = os.getenv("LLM_CACHE_DIR", ".llm_cache")
 LLM_CACHE_ENABLED: bool = os.getenv("LLM_CACHE_ENABLED", "true").lower() == "true"
 
-# ── Phase 2 startup validation ────────────────────────────────────────────────
-def validate_phase2_config() -> list:
+# ── API config validation ────────────────────────────────────────────────────
+def validate_api_config() -> list:
     """
-    Check all required Phase 2 env vars are set.
+    Check required env vars for live API mode are set.
     Returns list of missing variable names (empty = all good).
     """
     errors = []
@@ -129,7 +126,7 @@ ENTITY_SIMILARITY_THRESHOLD: float = float(os.getenv("ENTITY_SIMILARITY_THRESHOL
 
 def validate_config() -> list:
     """
-    Validate configuration for Phase 2 and Phase 3.
+    Validate configuration for live runs (API keys, tracing, etc.).
 
     Returns list of error messages (empty = all good).
     """

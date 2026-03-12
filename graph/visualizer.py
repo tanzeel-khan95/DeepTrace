@@ -1,11 +1,8 @@
 """
-visualizer.py — D3.js force-directed graph visualization.
+D3.js force-directed graph visualization.
 
 Generates a self-contained HTML file that renders in Streamlit via
-st.components.v1.html(). Node and edge colours match the Phase 3 spec.
-Dark navy theme matching DeepTrace brand.
-
-Architecture position: called by graph_builder agent and Streamlit page 02.
+st.components.v1.html(). Dark navy theme matching DeepTrace brand.
 """
 import json
 import logging

@@ -1,1 +1,1 @@
-"""Scout agent system prompt. Phase 2+: used when USE_MOCK=false."""
+"""Scout agent system prompt. Used when USE_MOCK=false."""

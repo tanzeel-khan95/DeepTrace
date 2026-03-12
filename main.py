@@ -1,5 +1,5 @@
 """
-main.py — DeepTrace CLI entrypoint.
+DeepTrace CLI entrypoint.
 
 Usage:
   python main.py --target "Timothy Overturf" --context "CEO of Sisu Capital"
@@ -7,8 +7,6 @@ Usage:
   python main.py --eval
   python main.py --test-connections
   python main.py --help
-
-Architecture position: top-level CLI, imports pipeline.py and graph modules.
 """
 import logging
 import os
@@ -58,7 +56,7 @@ def main(target, context, env, run_eval, test_connections, stream):
         from graph.neo4j_manager import test_connection
         neo4j_ok = test_connection()
         console.print(f"Neo4j: {'[green]OK[/green]' if neo4j_ok else '[red]FAILED[/red]'}")
-        console.print("Anthropic / OpenAI / Google: [yellow]Skipped in Phase 1 (USE_MOCK=true)[/yellow]")
+        console.print("Anthropic / OpenAI / Google: [yellow]Skipped when USE_MOCK=true[/yellow]")
         sys.exit(0 if neo4j_ok else 1)
 
     # ── Evaluation run ─────────────────────────────────────────────────────────

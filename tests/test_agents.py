@@ -1,12 +1,12 @@
 """
-test_agents.py — Phase 2 agent tests.
+Agent and utility tests.
 
 These tests run with USE_MOCK=true (no API calls) to validate:
-  - All Phase 2 code paths are importable
+  - All agent code paths are importable
   - JSON parsing handles edge cases
   - Budget guard fires correctly
   - LLM cache writes and reads correctly
-  - Supervisor mock behaviour (Phase 1)
+  - Supervisor mock behaviour
 
 Tests that require real API keys are marked with @pytest.mark.integration
 and are skipped in standard CI (run manually with: pytest -m integration).
@@ -117,7 +117,7 @@ def test_llm_cache_disabled_returns_none():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Agent Import Tests (Phase 2 code must be importable)
+# Agent Import Tests
 # ─────────────────────────────────────────────────────────────────────────────
 
 def test_all_agents_importable():
@@ -152,7 +152,7 @@ def test_anthropic_client_raises_without_key():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Supervisor mock behaviour (Phase 1)
+# Supervisor mock behaviour
 # ─────────────────────────────────────────────────────────────────────────────
 
 from state.agent_state import make_initial_state

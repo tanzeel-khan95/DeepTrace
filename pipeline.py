@@ -1,8 +1,8 @@
 """
-pipeline.py — Phase 3 update.
+DeepTrace LangGraph pipeline.
 
 Wires SqliteSaver checkpointer into run_pipeline() and stream_pipeline().
-Every run now has a thread_id (= run_id) for checkpoint isolation.
+Every run has a thread_id (= run_id) for checkpoint isolation.
 """
 import os
 import logging
@@ -57,8 +57,7 @@ def build_graph(checkpointer=None):
 
     Args:
         checkpointer: LangGraph checkpointer for state persistence.
-                      Defaults to in-memory for Phase 1.
-                      Use SqliteSaver for Phase 2+ to avoid losing state.
+                      Defaults to in-memory if None; use SqliteSaver for persistence.
     Returns:
         Compiled LangGraph graph ready for .invoke() or .stream()
     """

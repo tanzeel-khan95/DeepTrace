@@ -1,10 +1,7 @@
 """
-supervisor_prompt.py — System prompt for the Supervisor Agent (Claude Opus 4.5).
+System prompt for the Supervisor Agent (Claude Opus 4.5).
 
-This prompt is used in Phase 2+ when USE_MOCK=false.
-Stored here so it can be cached with Anthropic prompt caching in Phase 2+.
-
-Architecture position: imported by agents/supervisor.py.
+Used when USE_MOCK=false; stored here for Anthropic prompt caching.
 """
 
 SUPERVISOR_SYSTEM_PROMPT = """<instructions>

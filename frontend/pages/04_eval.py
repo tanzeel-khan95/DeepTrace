@@ -1,9 +1,7 @@
 """
-04_eval.py — Evaluation dashboard for test personas.
+Evaluation dashboard for test personas.
 
 Runs evaluation personas and shows pass/fail per criterion with expected vs actual.
-
-Architecture position: calls pipeline.run_pipeline() for each persona.
 """
 import sys
 import os

@@ -1,1 +1,1 @@
-"""DeepTrace prompts — system prompts for all agents. See Section 8–12."""
+"""DeepTrace prompts — system prompts for all agents."""

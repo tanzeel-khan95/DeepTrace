@@ -1,6 +1,12 @@
-# DeepTrace Phase 1 — project-specific
+# DeepTrace — project-specific
 .env
 .llm_cache/
+.audit_logs/
+.checkpoints/
+.graph_artifacts/
+Reports/
+execution-logs.html
+langsmith-log.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

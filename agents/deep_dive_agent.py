@@ -1,13 +1,10 @@
 """
-agents/deep_dive_agent.py — Deep Dive Agent: extraction from search snippets.
+Deep Dive Agent: extraction from search snippets.
 
-Takes top results from raw_results (Tavily snippets only in Phase 2 — no scraper),
+Takes top results from raw_results (Tavily snippets; scraper optional),
 extracts structured Fact, Entity, Relationship objects, applies confidence scoring.
 
-Phase 1 (USE_MOCK=true): returns MOCK_DEEP_DIVE_RESULTS fixture directly.
-Phase 2+ (USE_MOCK=false): uses Haiku for extraction from snippets only.
-
-Architecture position: third node in LangGraph pipeline, called after Scout.
+When USE_MOCK=true returns fixture data; otherwise uses LLM for extraction from snippets.
 """
 import logging
 from pydantic import ValidationError
@@ -146,6 +143,15 @@ def run_deep_dive(state: AgentState) -> dict:
         facts = list(parsed.extracted_facts) if parsed.extracted_facts else []
         entities = list(parsed.entities) if parsed.entities else []
         rels = list(parsed.relationships) if parsed.relationships else []
+        # #region agent log
+        if not facts and not entities and not rels:
+            try:
+                import json as _j
+                with open("/home/tanzeel/Projects/DeepTrace/.cursor/debug-d62e4c.log", "a") as _f:
+                    _f.write(_j.dumps({"hypothesisId": "H5", "location": "deep_dive_agent:parsed_empty", "message": "Parsed response has no facts/entities/rels", "data": {"model": model}, "timestamp": __import__("time").time() * 1000}) + "\n")
+            except Exception:
+                pass
+        # #endregion
     except (ValidationError, Exception) as e:
         logger.warning(f"[DeepDive] Structured parse failed, using empty extraction: {e}")
         log_warning_to_run(f"[DeepDive] Structured parse failed, using empty extraction: {e}")

@@ -1,10 +1,7 @@
 """
-tavily_search.py — Tavily search API client (primary search).
+Tavily search API client (primary search).
 
-Phase 1 (USE_MOCK=true): returns static fixture results.
-Phase 2+ (USE_MOCK=false): calls real Tavily API.
-
-Architecture position: called by scout_agent.py.
+When USE_MOCK=true returns fixture results; otherwise calls real Tavily API.
 """
 import logging
 from config import USE_MOCK, TAVILY_API_KEY, MIN_RELEVANCE, MAX_SEARCH_RESULTS_PER_QUERY
@@ -23,7 +20,7 @@ async def tavily_search(query: str) -> list:
 
 
 def _sync_tavily_search(query: str) -> list:
-    """Sync Tavily search — called via asyncio.to_thread. Phase 2."""
+    """Sync Tavily search — called via asyncio.to_thread."""
     try:
         from tavily import TavilyClient
         if not TAVILY_API_KEY:

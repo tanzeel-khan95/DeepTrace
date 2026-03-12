@@ -1,1 +1,1 @@
-"""DeepTrace utils — budget guard, LLM cache (Phase 3). See Section 3."""
+"""DeepTrace utilities — budget guard, LLM cache, retry, tracing, etc."""

@@ -1,10 +1,8 @@
 """
-tracing.py — LangSmith tracing configuration and conditional @traceable decorator.
+LangSmith tracing configuration and conditional @traceable decorator.
 
 When LANGCHAIN_TRACING_V2=true, wraps all agent functions with LangSmith tracing.
 When false (dev default), applies a no-op decorator — zero performance overhead.
-
-Architecture position: imported by all agent files and pipeline.py.
 """
 import functools
 import logging

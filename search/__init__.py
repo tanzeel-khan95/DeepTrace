@@ -1,1 +1,1 @@
-"""DeepTrace search — Tavily, Brave, scraper. See Section 9–10."""
+"""DeepTrace search — Tavily, scraper, Haiku web search."""

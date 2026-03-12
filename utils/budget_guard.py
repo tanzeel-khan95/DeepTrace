@@ -1,10 +1,8 @@
 """
-budget_guard.py — Hard spending cap per environment phase.
+Hard spending cap per environment.
 
-Raises RuntimeError if estimated spend exceeds the phase budget.
-Called after each LLM response in Phase 2+.
-
-Architecture position: utility called by all agents in non-mock mode.
+Raises RuntimeError if estimated spend exceeds the configured budget.
+Called after each LLM response in non-mock mode.
 """
 from config import ENV, PHASE_BUDGET
 
@@ -13,7 +11,7 @@ _total_spent: float = 0.0
 def record_spend(input_tokens: int, output_tokens: int, model: str) -> None:
     """Add estimated cost of one LLM call to the running total."""
     global _total_spent
-    # Approximate pricing — update for Phase 2
+    # Approximate pricing per 1M tokens
     PRICE_PER_1M = {
         "claude-opus-4-5-20251101":   {"in": 5.00,  "out": 25.00},
         "claude-sonnet-4-6-20251120": {"in": 3.00,  "out": 15.00},

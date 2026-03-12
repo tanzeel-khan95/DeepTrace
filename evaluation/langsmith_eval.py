@@ -1,10 +1,8 @@
 """
-langsmith_eval.py — LangSmith evaluation dataset and scorer for DeepTrace.
+LangSmith evaluation dataset and scorer for DeepTrace.
 
 Creates a LangSmith dataset from the 3 evaluation personas and runs
 automated scoring after each pipeline run.
-
-Architecture position: called from main.py --eval flag and frontend/pages/04_eval.py.
 """
 import logging
 from typing import Optional
@@ -85,4 +83,4 @@ def score_run(run_state: dict, expected: dict) -> dict:
 
     return scores
 
-"""LangSmith-based evaluation for fact recall, risk precision. Phase 3 stub."""
+"""LangSmith-based evaluation for fact recall and risk precision."""

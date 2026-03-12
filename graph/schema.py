@@ -1,8 +1,7 @@
 """
-schema.py — Neo4j node constraints and allowed types for DeepTrace identity graph.
+Neo4j node constraints and allowed types for DeepTrace identity graph.
 
 Run setup_schema() once on first startup to create uniqueness constraints.
-Architecture position: called by neo4j_manager.py on connection init.
 """
 
 # Node uniqueness constraint Cypher statements

@@ -1,13 +1,11 @@
 """
-retry.py — Rate limiting and retry logic for all external API calls.
+Rate limiting and retry logic for all external API calls.
 
 Wraps Anthropic and Tavily calls with:
   - Exponential backoff on rate limit errors (HTTP 429 / RateLimitError)
   - Jitter to prevent thundering herd on parallel agent calls
   - Maximum retry cap (configurable via LLM_MAX_RETRIES in config)
-  - Token bucket rate limiter to stay within Haiku tier-1 limits (50 req/min)
-
-Architecture position: imported by utils/anthropic_client.py and search/tavily_search.py.
+  - Token bucket rate limiter (configurable per provider).
 """
 import asyncio
 import functools

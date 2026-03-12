@@ -1,10 +1,8 @@
 """
-agents/graph_builder.py — Graph Builder Agent.
+Graph Builder Agent.
 
 Converts Entity and Relationship objects to Cypher statements,
 canonicalizes entities, writes to Neo4j, and exports D3 HTML visualization.
-
-Architecture position: fifth and final node in LangGraph pipeline.
 """
 import logging
 import os

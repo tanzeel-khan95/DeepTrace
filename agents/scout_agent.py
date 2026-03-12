@@ -1,15 +1,12 @@
 """
-agents/scout_agent.py — Scout Agent: parallel search execution.
+Scout Agent: parallel search execution.
 
 Dispatches all queries from research_plan simultaneously via asyncio.gather().
 Primary: Tavily search. Haiku web search is used as a conditional secondary source
 when Tavily returns 2 or fewer results or when average relevance is below 0.5.
 Results are merged, deduplicated by URL, and sorted by relevance.
 
-Phase 1 (USE_MOCK=true): returns MOCK_SCOUT_RESULTS fixture directly.
-Phase 2+ (USE_MOCK=false): executes real parallel searches.
-
-Architecture position: second node in LangGraph pipeline, called by Supervisor.
+When USE_MOCK=true returns fixture data; otherwise executes real parallel searches.
 """
 import asyncio
 import logging
@@ -86,7 +83,7 @@ async def _fetch_one_query(query: str, idx: int) -> list:
 
 
 async def _async_scout(state: AgentState) -> dict:
-    """Real async implementation for Phase 2+."""
+    """Real async implementation for live search."""
     from utils.audit_logger import log_node_complete
 
     new_queries = [q for q in state["research_plan"]
