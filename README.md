@@ -1,6 +1,6 @@
 # DeepTrace — Autonomous AI Research Agent
 
-> Elile AI Technical Assessment · Phase 2 (Claude Haiku 4.5 flow)
+> Elile AI Technical Assessment 
 
 ## Quick Start
 
