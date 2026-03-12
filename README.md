@@ -33,20 +33,6 @@ streamlit run frontend/app.py
 python main.py --eval
 ```
 
-## Phase Status
-
-| Phase | Status | Description |
-|-------|--------|-------------|
-| Phase 1 | ✅ Complete | Full mock scaffold — LangGraph pipeline, Pydantic schemas, Streamlit UI, Neo4j integration (LLMs/APIs mocked) |
-| Phase 2 | ✅ Current | Complete end-to-end execution with **Claude Haiku 4.5** for the main flow (agents); **persona evaluation remains mocked** |
-| Phase 3 | ⏳ Next | LangSmith evaluation + caching + staged model mix with spending caps |
-| Phase 4 | ⏳ Planned | Production hardening + demo polish |
-
-## Phase 2 notes
-
-- **Mock toggle**: set `USE_MOCK=false` in `.env` to use real Claude Haiku 4.5 flow (requires `ANTHROPIC_API_KEY`). Keep `USE_MOCK=true` for Phase 1 mock runs.
-- **Neo4j**: still the only required external service for graph writes/visualisation.
-
 ## Virtual environment
 
 Always activate the venv before running commands:
