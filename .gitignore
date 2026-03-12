@@ -4,7 +4,6 @@
 .audit_logs/
 .checkpoints/
 .graph_artifacts/
-Reports/
 execution-logs.html
 langsmith-log.json
 
